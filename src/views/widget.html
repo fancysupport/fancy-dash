@@ -1,0 +1,13 @@
+{{ var width=data.size[0]*200-20; }}
+{{ var height=data.size[1]*200-20; }}
+{{ var off_x=data.position[0]*200; }}
+{{ var off_y=data.position[1]*200; }}
+
+<div class="widget"
+	style="width: {{= width }}px;
+		height: {{= height }}px;
+		left: {{= off_x }}px;
+		top: {{= off_y }}px;"
+	data-id="{{= data.name }}">
+
+</div>

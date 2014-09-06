@@ -5,6 +5,9 @@ var cssmin = require('gulp-cssmin');
 var stylus = require('gulp-stylus');
 var concat = require('gulp-concat');
 var livereload = require('gulp-livereload');
+var header = require('gulp-header');
+var dot = require('gulp-dot-precompiler')
+
 var notifier = require('node-notifier');
 var express = require('express');
 var sstatic = require('serve-static');
@@ -30,15 +33,37 @@ var handle_error = function(e) {
 	n.notify({title: 'Build Error', message: e.message});
 };
 
-gulp.task('js', function() {
+gulp.task('dot', function() {
+	var d = dot({dictionary: 'Templates'})
+		.on('error', function(e) {
+			handle_error(e);
+			d.end();
+			return false;
+		});
+
+	return gulp.src('src/views/**/*')
+		.pipe(d)
+		.pipe(concat('templates.js'))
+		.pipe(header('Templates = {};\n'))
+		.pipe(gulp.dest('src/js'));
+});
+
+gulp.task('js', ['dot'], function() {
 	return gulp.src('src/**/*.js')
 		.pipe(concat('dash.js'))
 		.pipe(gulp.dest('dist/assets'));
 });
 
 gulp.task('min_js', ['js'], function() {
+	var u = uglify()
+		.on('error', function(e) {
+			handle_error(e);
+			u.end();
+			return false;
+		});
+
 	return gulp.src('dist/assets/dash.js')
-		.pipe(uglify())
+		.pipe(u)
 		.pipe(concat('dash.min.js'))
 		.pipe(gulp.dest('dist/assets'));
 });
@@ -73,6 +98,7 @@ gulp.task('watch', function() {
 	});
 
 	gulp.watch('src/css/**/*', ['min_css']);
+	gulp.watch('src/views/**/*', ['dot']);
 
 	gulp.watch('dist/assets/css/*').on('change', function(f) {
 		livereload().changed(f.path);

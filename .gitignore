@@ -18,5 +18,7 @@ node_modules
 build
 dist/assets/*.js
 dist/assets/css/base.css
+dist/assets/css/base.min.css
+src/js/templates.js
 
 *.sublime*

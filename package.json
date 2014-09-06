@@ -15,7 +15,9 @@
     "gulp-util": "~3.0.1",
     "gulp-livereload": "~2.1.1",
     "gulp-concat": "~2.3.5",
-    "gulp-cssmin": "~0.1.6"
+    "gulp-cssmin": "~0.1.6",
+    "gulp-dot-precompiler": "~0.3.0",
+    "gulp-header": "~1.0.5"
   },
   "devDependencies": {},
   "scripts": {
