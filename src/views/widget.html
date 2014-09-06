@@ -9,5 +9,8 @@
 		left: {{= off_x }}px;
 		top: {{= off_y }}px;"
 	data-id="{{= data.name }}">
-
+	{{? data.type === 'line' }}
+		<canvas width="{{= width-20 }}" height="{{= height-45 }}"></canvas>
+		<div class="legend"></div>
+	{{?}}
 </div>
