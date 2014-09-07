@@ -89,41 +89,54 @@ var Dash = {
 		});
 	},
 
-	generate_line: function(points, ctx, legend) {
+	generate_line: function(w, node) {
 		var that = this;
 
-		// do hourly over last day for now
-		// TODO make proper time range
-		points = this.generate_timeseries(points, 24+1, 60*60*1000);
-		points.sort(function(a,b){return a.key-b.key;});
+		var ctx = node.querySelector('canvas').getContext('2d');
+		var legend = node.querySelector('.legend');
 
-		var data = {
-			labels: points.map(function(e, i) {
-				return that.timeago(parseInt(e.key, 10)/1000);
-			}),
+		var period = 60*60*1000;
+		var points = 24+1;
 
-			datasets: [{
-				label: 'todo labels',
-				fillColor: "rgba(169,169,169,0.4)",
-				strokeColor: "rgba(169,169,169,1)",
-				pointColor: "rgba(169,169,169,1)",
-				pointStrokeColor: "#fff",
-				pointHighlightFill: "#fff",
-				pointHighlightStroke: "rgba(169,169,169,1)",
+		w.period = period * 0.1;
 
-				data: points.map(function(e) { return e.value; })
-			}]
-		};
+		this.get_widget_data(w.name, function(ok, err) {
+			if (ok && ok.data) {
+				var values = that.generate_timeseries(ok.data[0].dps, points, period);
+				values.sort(function(a,b){return a.key-b.key;});
 
-		var options = {
-			scaleVerticalGridLines:false,
-			skipXLabels: 6,
-			bezierCurve: false
-		};
+				var data = {
+					labels: values.map(function(e, i) {
+						return that.timeago(parseInt(e.key, 10)/1000);
+					}),
 
-		this.generate_legend(legend, data);
+					datasets: [{
+						label: 'todo labels',
+						fillColor: "rgba(169,169,169,0.4)",
+						strokeColor: "rgba(169,169,169,1)",
+						pointColor: "rgba(169,169,169,1)",
+						pointStrokeColor: "#fff",
+						pointHighlightFill: "#fff",
+						pointHighlightStroke: "rgba(169,169,169,1)",
 
-		return new Chart(ctx).Line(data, options);
+						data: values.map(function(e) { return e.value; })
+					}]
+				};
+
+				var options = {
+					scaleVerticalGridLines:false,
+					skipXLabels: 6,
+					bezierCurve: false,
+					animation: w.chart ? false : true
+				};
+
+				that.generate_legend(legend, data);
+
+				if (w.chart) w.chart.destroy();
+
+				w.chart = new Chart(ctx).Line(data, options);
+			}
+		});
 	},
 
 	get_dash: function(token) {
@@ -162,19 +175,16 @@ var Dash = {
 		this.widgets[w.name] = w;
 
 		this.render_widget(w);
-		
+
 		var node = this.qs('[data-id='+w.name+']');
 
 		if (w.type === 'line') {
-			var ctx = node.querySelector('canvas').getContext('2d');
-			var legend = node.querySelector('.legend');
+			this.generate_line(w, node);
 
-			this.get_widget_data(w.name, function(ok, err) {
-				console.log('widget data', ok, err);
-				if (ok) {
-					w.chart = that.generate_line(ok.data[0].dps, ctx, legend);
-				}
-			});
+			w.interval = setInterval(function() {
+				that.generate_line(w, node);
+				console.log('new line for', w.name);
+			}, w.period);
 		}
 	},
 
@@ -249,7 +259,7 @@ var Dash = {
 		YEAR   = 31556926;
 		DECADE = 315569260;
 
-		if (offset <= MINUTE)              span = [ '', 'moments' ];
+		if (offset <= MINUTE)              span = [ '', 'now' ];
 		else if (offset < (MINUTE * 60))   span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ];
 		else if (offset < (HOUR * 24))     span = [ Math.round(Math.abs(offset / HOUR)), 'hr' ];
 		else if (offset < (DAY * 7))       span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
@@ -260,6 +270,8 @@ var Dash = {
 
 		span[1] += (span[0] === 0 || span[0] > 1) ? 's' : '';
 		span = span.join(' ');
+
+		if (span === ' now') return span;
 
 		return (time <= local)  ? span + ' ago' : 'in ' + span;
 	}
