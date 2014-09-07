@@ -89,104 +89,82 @@ var Dash = {
 		});
 	},
 
-	generate_line: function(w, node) {
-		var that = this;
-
-		var ctx = node.querySelector('canvas').getContext('2d');
-		var legend = node.querySelector('.legend');
-
-		var period = 60*60*1000;
-		var points = 24+1;
-
-		w.period = period * 0.1;
-
-		this.get_widget_data(w.name, function(ok, err) {
-			if (ok && ok.data) {
-				if ( ! ok.data[0]) ok.data[0] = {dps:{}};
-
-				var values = that.generate_timeseries(ok.data[0].dps, points, period);
-				values.sort(function(a,b){return a.key-b.key;});
-
-				var data = {
-					labels: values.map(function(e, i) {
-						return that.timeago(parseInt(e.key, 10)/1000);
-					}),
-
-					datasets: [{
-						label: 'todo labels',
-						fillColor: "rgba(169,169,169,0.4)",
-						strokeColor: "rgba(169,169,169,1)",
-						pointColor: "rgba(169,169,169,1)",
-						pointStrokeColor: "#fff",
-						pointHighlightFill: "#fff",
-						pointHighlightStroke: "rgba(169,169,169,1)",
-
-						data: values.map(function(e) { return e.value; })
-					}]
-				};
-
-				var options = {
-					scaleVerticalGridLines:false,
-					skipXLabels: 6,
-					bezierCurve: false,
-					animation: w.chart ? false : true
-				};
-
-				that.generate_legend(legend, data);
-
-				if (w.chart) w.chart.destroy();
-
-				w.chart = new Chart(ctx).Line(data, options);
+	generate_line: function(widget) {
+		this.generate_chart({
+			widget: widget,
+			type: 'Line',
+			options: {
+				scaleVerticalGridLines:false,
+				skipXLabels: 6,
+				bezierCurve: false,
+				animation: widget.chart ? false : true
+			},
+			style: {
+				label: 'todo labels',
+				fillColor: "rgba(169,169,169,0.4)",
+				strokeColor: "rgba(169,169,169,1)",
+				pointColor: "rgba(169,169,169,1)",
+				pointStrokeColor: "#fff",
+				pointHighlightFill: "#fff",
+				pointHighlightStroke: "rgba(169,169,169,1)"
 			}
 		});
 	},
 
-	generate_bar: function(w, node) {
+	generate_bar: function(widget) {
+		this.generate_chart({
+			widget: widget,
+			type: 'Bar',
+			options: {
+				scaleVerticalGridLines:false,
+				skipXLabels: 6,
+				animation: widget.chart ? false : true
+			},
+			style: {
+				label: 'todo label',
+				fillColor: "rgba(169,169,169,0.4)",
+				strokeColor: "rgba(169,169,169,1)",
+				highlightFill: "rgba(169,169,169,0.75)",
+				highlightStroke: "rgba(169,169,169,1)"
+			}
+		});
+	},
+
+	generate_chart: function(opts) {
 		var that = this;
 
+		var node = this.qs('[data-id='+opts.widget.name+']');
 		var ctx = node.querySelector('canvas').getContext('2d');
 		var legend = node.querySelector('.legend');
 
 		var period = 60*60*1000;
 		var points = 24+1;
 
-		w.period = period * 0.1;
+		opts.widget.period = period * 0.1;
 
-		this.get_widget_data(w.name, function(ok, err) {
-			console.log(ok)
+		this.get_widget_data(opts.widget.name, function(ok, err) {
 			if (ok && ok.data) {
 				if ( ! ok.data[0]) ok.data[0] = {dps:{}};
 
 				var values = that.generate_timeseries(ok.data[0].dps, points, period);
 				values.sort(function(a,b){return a.key-b.key;});
 
+				// TODO make it handle multiple data sets
+				opts.style.data = values.map(function(e) { return e.value; });
+
 				var data = {
 					labels: values.map(function(e, i) {
 						return that.timeago(parseInt(e.key, 10)/1000);
 					}),
 
-					datasets: [{
-						label: 'todo label',
-						fillColor: "rgba(169,169,169,0.4)",
-						strokeColor: "rgba(169,169,169,1)",
-						highlightFill: "rgba(169,169,169,0.75)",
-						highlightStroke: "rgba(169,169,169,1)",
-
-						data: values.map(function(e) { return e.value; })
-					}]
-				};
-
-				var options = {
-					scaleVerticalGridLines:false,
-					skipXLabels: 6,
-					animation: w.chart ? false : true
+					datasets: [opts.style]
 				};
 
 				that.generate_legend(legend, data);
 
-				if (w.chart) w.chart.destroy();
+				if (opts.widget.chart) opts.widget.chart.destroy();
 
-				w.chart = new Chart(ctx).Bar(data, options);
+				opts.widget.chart = new Chart(ctx)[opts.type](data, opts.options);
 			}
 		});
 	},
@@ -232,10 +210,10 @@ var Dash = {
 
 		if (['line','bar'].indexOf(w.type) === -1) return;
 
-		this['generate_'+w.type](w, node);
+		this['generate_'+w.type](w);
 
 		w.interval = setInterval(function() {
-			thatthis['generate_'+w.type](w, node);
+			that['generate_'+w.type](w);
 			console.log('new '+w.type+' for', w.name);
 		}, w.period);
 	},
