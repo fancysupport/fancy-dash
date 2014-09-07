@@ -102,6 +102,8 @@ var Dash = {
 
 		this.get_widget_data(w.name, function(ok, err) {
 			if (ok && ok.data) {
+				if ( ! ok.data[0]) ok.data[0] = {dps:{}};
+
 				var values = that.generate_timeseries(ok.data[0].dps, points, period);
 				values.sort(function(a,b){return a.key-b.key;});
 
@@ -135,6 +137,56 @@ var Dash = {
 				if (w.chart) w.chart.destroy();
 
 				w.chart = new Chart(ctx).Line(data, options);
+			}
+		});
+	},
+
+	generate_bar: function(w, node) {
+		var that = this;
+
+		var ctx = node.querySelector('canvas').getContext('2d');
+		var legend = node.querySelector('.legend');
+
+		var period = 60*60*1000;
+		var points = 24+1;
+
+		w.period = period * 0.1;
+
+		this.get_widget_data(w.name, function(ok, err) {
+			console.log(ok)
+			if (ok && ok.data) {
+				if ( ! ok.data[0]) ok.data[0] = {dps:{}};
+
+				var values = that.generate_timeseries(ok.data[0].dps, points, period);
+				values.sort(function(a,b){return a.key-b.key;});
+
+				var data = {
+					labels: values.map(function(e, i) {
+						return that.timeago(parseInt(e.key, 10)/1000);
+					}),
+
+					datasets: [{
+						label: 'todo label',
+						fillColor: "rgba(169,169,169,0.4)",
+						strokeColor: "rgba(169,169,169,1)",
+						highlightFill: "rgba(169,169,169,0.75)",
+						highlightStroke: "rgba(169,169,169,1)",
+
+						data: values.map(function(e) { return e.value; })
+					}]
+				};
+
+				var options = {
+					scaleVerticalGridLines:false,
+					skipXLabels: 6,
+					animation: w.chart ? false : true
+				};
+
+				that.generate_legend(legend, data);
+
+				if (w.chart) w.chart.destroy();
+
+				w.chart = new Chart(ctx).Bar(data, options);
 			}
 		});
 	},
@@ -178,14 +230,14 @@ var Dash = {
 
 		var node = this.qs('[data-id='+w.name+']');
 
-		if (w.type === 'line') {
-			this.generate_line(w, node);
+		if (['line','bar'].indexOf(w.type) === -1) return;
 
-			w.interval = setInterval(function() {
-				that.generate_line(w, node);
-				console.log('new line for', w.name);
-			}, w.period);
-		}
+		this['generate_'+w.type](w, node);
+
+		w.interval = setInterval(function() {
+			thatthis['generate_'+w.type](w, node);
+			console.log('new '+w.type+' for', w.name);
+		}, w.period);
 	},
 
 	get_widget_data: function(name, cb) {
