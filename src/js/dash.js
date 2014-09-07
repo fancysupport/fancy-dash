@@ -42,12 +42,6 @@ var Dash = {
 		return document.querySelector(q);
 	},
 
-	empty: function(node) {
-		while (node.firstChild) {
-			node.removeChild(node.firstChild);
-		}
-	},
-
 	generate_timeseries: function(data, points, period) {
 		var end = {};
 		var now = new Date().getTime();
@@ -65,7 +59,10 @@ var Dash = {
 			}
 		}
 
-		return this.entries(end);
+		end = this.entries(end);
+		end.sort(function(a,b){return a.key-b.key;});
+
+		return end;
 	},
 
 	generate_legend: function(parent, data) {
@@ -73,8 +70,8 @@ var Dash = {
 		var datas = data.hasOwnProperty('datasets') ? data.datasets : data;
 
 		// remove possible children of the parent
-		while(parent.hasChildNodes()) {
-			parent.removeChild(parent.lastChild);
+		while (parent.firstChild) {
+			parent.removeChild(node.firstChild);
 		}
 
 		datas.forEach(function(d) {
@@ -99,7 +96,7 @@ var Dash = {
 				bezierCurve: false,
 				animation: widget.chart ? false : true
 			},
-			style: {
+			datasets: [{
 				label: 'todo labels',
 				fillColor: "rgba(169,169,169,0.4)",
 				strokeColor: "rgba(169,169,169,1)",
@@ -107,7 +104,7 @@ var Dash = {
 				pointStrokeColor: "#fff",
 				pointHighlightFill: "#fff",
 				pointHighlightStroke: "rgba(169,169,169,1)"
-			}
+			}]
 		});
 	},
 
@@ -120,13 +117,13 @@ var Dash = {
 				skipXLabels: 6,
 				animation: widget.chart ? false : true
 			},
-			style: {
+			datasets: [{
 				label: 'todo label',
 				fillColor: "rgba(169,169,169,0.4)",
 				strokeColor: "rgba(169,169,169,1)",
 				highlightFill: "rgba(169,169,169,0.75)",
 				highlightStroke: "rgba(169,169,169,1)"
-			}
+			}]
 		});
 	},
 
@@ -140,24 +137,23 @@ var Dash = {
 		var period = 60*60*1000;
 		var points = 24+1;
 
+		var values;
+
 		opts.widget.period = period * 0.1;
 
 		this.get_widget_data(opts.widget.name, function(ok, err) {
 			if (ok && ok.data) {
-				if ( ! ok.data[0]) ok.data[0] = {dps:{}};
-
-				var values = that.generate_timeseries(ok.data[0].dps, points, period);
-				values.sort(function(a,b){return a.key-b.key;});
-
-				// TODO make it handle multiple data sets
-				opts.style.data = values.map(function(e) { return e.value; });
+				for (var i=0; i<ok.data.length; i++) {
+					values = that.generate_timeseries(ok.data[i].dps, points, period);
+					opts.datasets[i].data = values.map(function(e) { return e.value; });
+				}
 
 				var data = {
 					labels: values.map(function(e, i) {
 						return that.timeago(parseInt(e.key, 10)/1000);
 					}),
 
-					datasets: [opts.style]
+					datasets: opts.datasets
 				};
 
 				that.generate_legend(legend, data);
@@ -166,25 +162,6 @@ var Dash = {
 
 				opts.widget.chart = new Chart(ctx)[opts.type](data, opts.options);
 			}
-		});
-	},
-
-	get_dash: function(token) {
-		var that = this;
-
-		this.ajax({
-			method: 'GET',
-			url: '/dashboards/' + token
-		}, function(ok, err) {
-			console.log(ok, err);
-
-			if (ok)	{
-				that.active = ok.data;
-				that.init_dash();
-			}
-
-			if (err && err.code === 404)
-				that.render_notfound();
 		});
 	},
 
@@ -216,6 +193,25 @@ var Dash = {
 			that['generate_'+w.type](w);
 			console.log('new '+w.type+' for', w.name);
 		}, w.period);
+	},
+
+	get_dash: function(token) {
+		var that = this;
+
+		this.ajax({
+			method: 'GET',
+			url: '/dashboards/' + token
+		}, function(ok, err) {
+			console.log(ok, err);
+
+			if (ok)	{
+				that.active = ok.data;
+				that.init_dash();
+			}
+
+			if (err && err.code === 404)
+				that.render_notfound();
+		});
 	},
 
 	get_widget_data: function(name, cb) {
