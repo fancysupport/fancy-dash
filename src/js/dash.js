@@ -44,6 +44,7 @@ var Dash = {
 
 	generate_timeseries: function(data, points, period) {
 		var end = {};
+
 		var now = new Date().getTime();
 
 		for (var i=0; i<points; i++) {
@@ -52,7 +53,7 @@ var Dash = {
 
 		for (orig in data) {
 			for (time in end) {
-				if (orig*1000 >= time && Math.abs(orig*1000-time) < period) {
+				if ( Math.abs(orig*1000-time) < period) {
 					end[time] = data[orig];
 					break;
 				}
@@ -71,7 +72,7 @@ var Dash = {
 
 		// remove possible children of the parent
 		while (parent.firstChild) {
-			parent.removeChild(node.firstChild);
+			parent.removeChild(parent.firstChild);
 		}
 
 		datas.forEach(function(d) {
@@ -87,6 +88,7 @@ var Dash = {
 	},
 
 	generate_line: function(widget) {
+		return this.d3_line(widget);
 		this.generate_chart({
 			widget: widget,
 			type: 'Line',
@@ -109,6 +111,8 @@ var Dash = {
 	},
 
 	generate_bar: function(widget) {
+		//widget.period = 60000;
+		return this.d3_bar(widget);
 		this.generate_chart({
 			widget: widget,
 			type: 'Bar',
@@ -143,6 +147,8 @@ var Dash = {
 
 		this.get_widget_data(opts.widget.name, function(ok, err) {
 			if (ok && ok.data) {
+				if (ok.data.length === 0) ok.data[0] = {dps:{}};
+
 				for (var i=0; i<ok.data.length; i++) {
 					values = that.generate_timeseries(ok.data[i].dps, points, period);
 					opts.datasets[i].data = values.map(function(e) { return e.value; });
@@ -161,6 +167,119 @@ var Dash = {
 				if (opts.widget.chart) opts.widget.chart.destroy();
 
 				opts.widget.chart = new Chart(ctx)[opts.type](data, opts.options);
+			}
+		});
+	},
+
+	d3_line: function(widget) {
+		var that = this;
+		var format = d3.format('.4s');
+
+		this.get_widget_data(widget.name, function(ok, err) {
+			if (ok && ok.data) {
+				if (ok.data.length === 0) ok.data[0] = {dps:{}};
+			}
+		})
+	},
+
+	d3_bar: function(widget) {
+		var that = this;
+		var format = d3.format('.4s');
+
+		var period = 60*60*1000;
+		var points = 25;
+
+		var margin = {top: 20, right: 30, bottom: 30, left: 40};
+		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
+		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
+
+		var x = d3.scale.linear()
+			.rangeRound([0, width])
+
+		var y = d3.scale.linear()
+			.range([height, 0])
+
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.tickFormat(function(d) { return that.timeago(d/1000); })
+			.orient('bottom')
+
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.tickFormat(function(d) {
+				var p = d3.formatPrefix(d);
+				return p.scale(d) + p.symbol;
+			})
+			.orient('left');
+
+		node = d3.select('[data-id=' + widget.name + ']')
+		svg = node.append('svg')
+				.attr('width', width + margin.left + margin.right)
+				.attr('height', height + margin.top + margin.bottom)
+			.append('g')
+				.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		var tip = d3.tip()
+			.attr('class', 'd3-tip')
+			.html(function(d) {
+				return that.timeago(d.key/1000) + ': ' + format(d.value);
+				//return new Date(+d.key).toString() + ': ' + format(d.value);
+			});
+		svg.call(tip);
+
+		this.get_widget_data(widget.name, function(ok, err) {
+			if (ok && ok.data) {
+				if (ok.data.length === 0) ok.data[0] = {dps:{}};
+				
+				// remove previous stuff in prep for redraw
+				node.selectAll('svg > g > *').remove();
+
+				//var data = that.generate_timeseries(ok.data[0].dps, points, period)
+
+				// an extra period at either end for padding?
+				x.domain([Date.now()-points*period, Date.now()+period])
+
+				// make domain slightly larger than the actual data
+				y.domain([0, d3.max(data, function(d) { return d.value*1.1; })])
+
+				xAxis.tickValues(data.map(function(d) { return d.key; }))
+
+				// x axis
+				svg.append('g')
+					.attr('class', 'x axis')
+					.attr('transform', 'translate(0,' + height + ')')
+					.call(xAxis)
+
+				// remove most of the ticks
+				// TODO change points/4 to more generic
+				svg.selectAll('.x.axis > .tick')
+					.each(function(d, i) {
+						if (i % Math.floor(points/4) !== 0)
+							this.remove();
+					});
+
+				// y axis
+				svg.append('g')
+					.attr('class', 'y axis')
+					.call(yAxis)
+
+				// y grid lines
+				svg.append('g')
+					.attr('class', 'grid')
+					.call(yAxis.tickSize(-width, 0, 0).tickFormat(''))
+					// TODO actually make sure this always removes the bottom one
+					.select('g').remove()
+
+				svg.selectAll('.bar')
+					.data(data)
+				.enter().append('rect')
+					.attr('class', 'bar')
+					.attr('x', function(d) { return x(d.key) - width/points*0.9/2; })
+					.attr('width', width/points*0.9)
+					.attr('y', function(d) { return y(d.value); })
+					.attr('height', function(d) { return height - y(d.value); })
+					.on('mouseover', tip.show)
+					.on('mouseout', tip.hide);
 			}
 		});
 	},
@@ -188,11 +307,11 @@ var Dash = {
 		if (['line','bar'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
-
+		console.log(w)
 		w.interval = setInterval(function() {
 			that['generate_'+w.type](w);
 			console.log('new '+w.type+' for', w.name);
-		}, w.period);
+		}, 6*60*1000); // TODO fix this when widgets are better structured
 	},
 
 	get_dash: function(token) {
