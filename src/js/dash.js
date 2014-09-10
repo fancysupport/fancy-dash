@@ -44,18 +44,24 @@ var Dash = {
 
 	generate_timeseries: function(data, points, period) {
 		var end = {};
-
 		var now = new Date().getTime();
 
-		for (var i=0; i<points; i++) {
-			end[now-i*period] = 0;
+		var empty = [];
+		for (var i=0; i<data.length; i++) {
+			empty.push(0);
 		}
 
-		for (orig in data) {
-			for (time in end) {
-				if ( Math.abs(orig*1000-time) < period) {
-					end[time] = data[orig];
-					break;
+		for (var i=0; i<points; i++) {
+			end[now-i*period] = empty.slice(0);
+		}
+
+		for (var i=0; i<data.length; i++) {
+			for (var orig in data[i]) {
+				for (var time in end) {
+					if (orig*1000 > time && Math.abs(orig*1000-time) < period) {
+						end[time][i] = data[i][orig];
+						break;
+					}
 				}
 			}
 		}
@@ -88,101 +94,17 @@ var Dash = {
 	},
 
 	generate_line: function(widget) {
-		return this.d3_line(widget);
-		this.generate_chart({
-			widget: widget,
-			type: 'Line',
-			options: {
-				scaleVerticalGridLines:false,
-				skipXLabels: 6,
-				bezierCurve: false,
-				animation: widget.chart ? false : true
-			},
-			datasets: [{
-				label: 'todo labels',
-				fillColor: "rgba(169,169,169,0.4)",
-				strokeColor: "rgba(169,169,169,1)",
-				pointColor: "rgba(169,169,169,1)",
-				pointStrokeColor: "#fff",
-				pointHighlightFill: "#fff",
-				pointHighlightStroke: "rgba(169,169,169,1)"
-			}]
-		});
-	},
-
-	generate_bar: function(widget) {
-		//widget.period = 60000;
-		return this.d3_bar(widget);
-		this.generate_chart({
-			widget: widget,
-			type: 'Bar',
-			options: {
-				scaleVerticalGridLines:false,
-				skipXLabels: 6,
-				animation: widget.chart ? false : true
-			},
-			datasets: [{
-				label: 'todo label',
-				fillColor: "rgba(169,169,169,0.4)",
-				strokeColor: "rgba(169,169,169,1)",
-				highlightFill: "rgba(169,169,169,0.75)",
-				highlightStroke: "rgba(169,169,169,1)"
-			}]
-		});
-	},
-
-	generate_chart: function(opts) {
-		var that = this;
-
-		var node = this.qs('[data-id='+opts.widget.name+']');
-		var ctx = node.querySelector('canvas').getContext('2d');
-		var legend = node.querySelector('.legend');
-
-		var period = 60*60*1000;
-		var points = 24+1;
-
-		var values;
-
-		opts.widget.period = period * 0.1;
-
-		this.get_widget_data(opts.widget.name, function(ok, err) {
-			if (ok && ok.data) {
-				if (ok.data.length === 0) ok.data[0] = {dps:{}};
-
-				for (var i=0; i<ok.data.length; i++) {
-					values = that.generate_timeseries(ok.data[i].dps, points, period);
-					opts.datasets[i].data = values.map(function(e) { return e.value; });
-				}
-
-				var data = {
-					labels: values.map(function(e, i) {
-						return that.timeago(parseInt(e.key, 10)/1000);
-					}),
-
-					datasets: opts.datasets
-				};
-
-				that.generate_legend(legend, data);
-
-				if (opts.widget.chart) opts.widget.chart.destroy();
-
-				opts.widget.chart = new Chart(ctx)[opts.type](data, opts.options);
-			}
-		});
-	},
-
-	d3_line: function(widget) {
 		var that = this;
 		var format = d3.format('.4s');
 
-		this.get_widget_data(widget.name, function(ok, err) {
+		this.get_widget_data(widget.id, function(ok, err) {
 			if (ok && ok.data) {
 				if (ok.data.length === 0) ok.data[0] = {dps:{}};
 			}
 		})
 	},
 
-	d3_bar: function(widget) {
+	generate_bar: function(widget) {
 		var that = this;
 		var format = d3.format('.4s');
 
@@ -227,14 +149,23 @@ var Dash = {
 			});
 		svg.call(tip);
 
-		this.get_widget_data(widget.name, function(ok, err) {
+		this.get_widget_data(widget.id, function(ok, err) {
 			if (ok && ok.data) {
-				if (ok.data.length === 0) ok.data[0] = {dps:{}};
-				
+
+				var sources = [];
+				for (var i=0; i<ok.data.length; i++) {
+					for (var j=0; j<widget.sources.length; j++) {
+						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb')
+							sources.push(ok.data[i].data);
+					}
+				}
+
+				var data = that.generate_timeseries(sources, points, period);
+		/*		
 				// remove previous stuff in prep for redraw
 				node.selectAll('svg > g > *').remove();
 
-				//var data = that.generate_timeseries(ok.data[0].dps, points, period)
+				var data = that.generate_timeseries(ok.data[0].dps, points, period)
 
 				// an extra period at either end for padding?
 				x.domain([Date.now()-points*period, Date.now()+period])
@@ -280,6 +211,8 @@ var Dash = {
 					.attr('height', function(d) { return height - y(d.value); })
 					.on('mouseover', tip.show)
 					.on('mouseout', tip.hide);
+
+				*/
 			}
 		});
 	},
@@ -298,7 +231,7 @@ var Dash = {
 		var that = this;
 
 		// assign to list to keep track easier
-		this.widgets[w.name] = w;
+		this.widgets[w.id] = w;
 
 		this.render_widget(w);
 
@@ -333,10 +266,10 @@ var Dash = {
 		});
 	},
 
-	get_widget_data: function(name, cb) {
+	get_widget_data: function(id, cb) {
 		this.ajax({
 			method: 'GET',
-			url: '/dashboards/' + this.active.token + '/data/' + name
+			url: '/dashboards/' + this.active.token + '/widgets/' + id + '/data'
 		}, cb);
 	},
 
