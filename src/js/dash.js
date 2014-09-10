@@ -46,22 +46,15 @@ var Dash = {
 		var end = {};
 		var now = new Date().getTime();
 
-		var empty = [];
-		for (var i=0; i<data.length; i++) {
-			empty.push(0);
-		}
-
 		for (var i=0; i<points; i++) {
-			end[now-i*period] = empty.slice(0);
+			end[now-i*period] = 0;
 		}
 
-		for (var i=0; i<data.length; i++) {
-			for (var orig in data[i]) {
-				for (var time in end) {
-					if (orig*1000 > time && Math.abs(orig*1000-time) < period) {
-						end[time][i] = data[i][orig];
-						break;
-					}
+		for (var orig in data) {
+			for (var time in end) {
+				if (Math.abs(orig*1000-time) < period) {
+					end[time] = data[orig];
+					break;
 				}
 			}
 		}
@@ -70,6 +63,21 @@ var Dash = {
 		end.sort(function(a,b){return a.key-b.key;});
 
 		return end;
+	},
+
+	ts2: function(sources, points, period) {
+		var stack = [];
+		for (var i=0; i<sources.length; i++) {
+			stack[i] = {
+				id: sources[i].id,
+				name: sources[i].name,
+				values: this.generate_timeseries(sources[i].data, points, period).map(function(e) {
+					return {x: e.key, y: e.value};
+				})
+			}
+		}
+		console.log('stack', stack);
+		return stack;
 	},
 
 	generate_legend: function(parent, data) {
@@ -110,6 +118,11 @@ var Dash = {
 
 		var period = 60*60*1000;
 		var points = 25;
+		var colours = [
+			'#a8bacf',
+			'#bd9cb7',
+			'#ef9f9f'
+		];
 
 		var margin = {top: 20, right: 30, bottom: 30, left: 40};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
@@ -127,6 +140,7 @@ var Dash = {
 			.orient('bottom')
 
 		var yAxis = d3.svg.axis()
+			.ticks(Math.round(height/20))
 			.scale(y)
 			.tickFormat(function(d) {
 				var p = d3.formatPrefix(d);
@@ -149,31 +163,41 @@ var Dash = {
 			});
 		svg.call(tip);
 
+		var stack = d3.layout.stack().values(function(d) {
+			return d.values;
+		});
+
 		this.get_widget_data(widget.id, function(ok, err) {
 			if (ok && ok.data) {
-
+				console.log(ok.data)
 				var sources = [];
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb')
-							sources.push(ok.data[i].data);
+						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
+							ok.data[i].name = widget.sources[j].name;
+							sources.push(ok.data[i]);
+						}
 					}
 				}
 
-				var data = that.generate_timeseries(sources, points, period);
-		/*		
+				var data = that.ts2(sources, points, period);
+				var layeredData = stack(data);
+				console.log(layeredData);
+				
 				// remove previous stuff in prep for redraw
 				node.selectAll('svg > g > *').remove();
-
-				var data = that.generate_timeseries(ok.data[0].dps, points, period)
 
 				// an extra period at either end for padding?
 				x.domain([Date.now()-points*period, Date.now()+period])
 
 				// make domain slightly larger than the actual data
-				y.domain([0, d3.max(data, function(d) { return d.value*1.1; })])
+				y.domain([0, d3.max(layeredData, function(layer) {
+					return d3.max(layer.values, function(d) {
+						return d.y0 + d.y;
+					}) * 1.1;
+				})])
 
-				xAxis.tickValues(data.map(function(d) { return d.key; }))
+				xAxis.tickValues(data[0].values.map(function(d) { return d.x; }))
 
 				// x axis
 				svg.append('g')
@@ -196,23 +220,32 @@ var Dash = {
 
 				// y grid lines
 				svg.append('g')
-					.attr('class', 'grid')
+					.attr('class', 'y grid')
 					.call(yAxis.tickSize(-width, 0, 0).tickFormat(''))
-					// TODO actually make sure this always removes the bottom one
 					.select('g').remove()
 
-				svg.selectAll('.bar')
-					.data(data)
-				.enter().append('rect')
-					.attr('class', 'bar')
-					.attr('x', function(d) { return x(d.key) - width/points*0.9/2; })
-					.attr('width', width/points*0.9)
-					.attr('y', function(d) { return y(d.value); })
-					.attr('height', function(d) { return height - y(d.value); })
-					.on('mouseover', tip.show)
-					.on('mouseout', tip.hide);
+				var layers = svg.selectAll('.layer')
+					.data(layeredData);
 
-				*/
+				layers.enter().append('g')
+					.attr('class', function(d, i) {
+						return 'layer ' + d.id; 
+					})
+					.attr('height', height)
+					.attr('style', function(d, i) { return 'fill:'+colours[i]+';'; });
+
+
+				var rect = layers.selectAll('rect').data(function(d) {
+					return d.values;
+				}, function(d) {
+					return d.x;
+				});
+
+				rect.enter().append('rect')
+					.attr('x', function(d) { return x(d.x) - width/points*0.9/2 })
+					.attr('width', width/points*0.9)
+					.attr('y', function(d) { return y(d.y0 + d.y); })
+					.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)});
 			}
 		});
 	},
