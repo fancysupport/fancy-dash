@@ -124,32 +124,34 @@ var Dash = {
 			'#ef9f9f'
 		];
 
-		var margin = {top: 20, right: 15, bottom: 25, left: 40};
+		var margin = {top: 20, right: 10, bottom: 23, left: 30};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
 		var x = d3.scale.linear()
-			.rangeRound([0, width])
+			.rangeRound([0, width]);
 
 		var y = d3.scale.linear()
-			.range([height, 0])
+			.range([height, 0]);
 
 		var xAxis = d3.svg.axis()
 			.scale(x)
 			.tickFormat(function(d) { return that.timeago(d/1000); })
-			.orient('bottom')
+			.orient('bottom');
 
 		var yAxis = d3.svg.axis()
-			.ticks(Math.round(height/20))
 			.scale(y)
+			.ticks(Math.round(height/20))
+			.orient('left')
+			.tickSize(-width, -width, 0)
+			.tickPadding(5)
 			.tickFormat(function(d) {
 				var p = d3.formatPrefix(d);
 				return p.scale(d) + p.symbol;
-			})
-			.orient('left');
+			});
 
-		node = d3.select('[data-id=' + widget.name + ']')
-		svg = node.append('svg')
+		var node = d3.select('[data-id=' + widget.name + ']')
+		var svg = node.append('svg')
 				.attr('width', width + margin.left + margin.right)
 				.attr('height', height + margin.top + margin.bottom)
 			.append('g')
@@ -159,104 +161,106 @@ var Dash = {
 			return d.values;
 		});
 
-		this.get_widget_data(widget.id, function(ok, err) {
-			if (ok && ok.data) {
-				var sources = [];
-				for (var i=0; i<ok.data.length; i++) {
-					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
-							ok.data[i].name = widget.sources[j].name;
-							sources.push(ok.data[i]);
+		svg.append('g')
+			.attr('class', 'x axis')
+			.attr('transform', 'translate(0,' + height + ')');
+
+		svg.append('g')
+			.attr('class', 'y axis')
+
+		var tip = d3.tip()
+			.attr('class', 'd3-tip');
+
+		svg.call(tip);
+
+		function draw() {
+			that.get_widget_data(widget.id, function(ok, err) {
+				if (ok && ok.data) {
+					console.log('new data');
+					var sources = [];
+					for (var i=0; i<ok.data.length; i++) {
+						for (var j=0; j<widget.sources.length; j++) {
+							if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
+								ok.data[i].name = widget.sources[j].name;
+								sources.push(ok.data[i]);
+							}
 						}
 					}
-				}
 
-				var data = that.generate_layered_series(sources, points, period);
-				var layeredData = stack(data);
-				
-				// remove previous stuff in prep for redraw
-				node.selectAll('svg > g > *').remove();
+					if (sources.length === 0) return;
 
-				// an extra period at either end for padding?
-				x.domain([Date.now()-points*period, Date.now()+period])
+					var data = that.generate_layered_series(sources, points, period);
+					var layeredData = stack(data);
 
-				// make domain slightly larger than the actual data
-				y.domain([0, d3.max(layeredData, function(layer) {
-					return d3.max(layer.values, function(d) {
-						return d.y0 + d.y;
-					}) * 1.1;
-				})])
+					// an extra period at either end for padding?
+					x.domain([Date.now()-points*period, Date.now()+period]);
 
-				xAxis.tickValues(data[0].values.map(function(d) { return d.x; }))
+					// make domain slightly larger than the actual data
+					y.domain([0, d3.max(layeredData, function(layer) {
+						return d3.max(layer.values, function(d) {
+							return d.y0 + d.y;
+						}) * 1.1;
+					})]);
 
-				// x axis
-				svg.append('g')
-					.attr('class', 'x axis')
-					.attr('transform', 'translate(0,' + height + ')')
-					.call(xAxis)
+					xAxis.tickValues(data[0].values.map(function(d) { return d.x; }));
+					svg.select('.x.axis').call(xAxis);
+					svg.select('.y.axis').call(yAxis);
 
-				// remove most of the ticks
-				// TODO change points/4 to more generic
-				svg.selectAll('.x.axis > .tick')
-					.each(function(d, i) {
-						if (width < 200) {
-							if (i !== 0 && i !== points-1)
+					// remove most of the ticks
+					svg.selectAll('.x.axis > .tick')
+						.each(function(d, i) {
+							if (width < 200) {
+								if (i !== 0 && i !== points-1)
+									this.remove();
+								return;
+							}
+
+							if (i % Math.floor(points/4) !== 0)
 								this.remove();
-							return;
-						}
+						});
 
-						if (i % Math.floor(points/4) !== 0)
-							this.remove();
-					});
-
-				// y axis
-				svg.append('g')
-					.attr('class', 'y axis')
-					.call(yAxis)
-
-				// y grid lines
-				svg.append('g')
-					.attr('class', 'y grid')
-					.call(yAxis.tickSize(-width, 0, 0).tickFormat(''))
-					.select('g').remove()
-
-				var tip = d3.tip()
-					.attr('class', 'd3-tip')
-					.html(function(d, e) {
+					tip.html(function(d, e) {
 						var s = that.timeago(+d.x/1000)
 						for (var i=0; i<layeredData.length; i++) {
 							s += '<br/>' + layeredData[i].name + ': ' + format(layeredData[i].values[e].y);
 						}
 						return s;
 					});
-				svg.call(tip);
 
-				var layers = svg.selectAll('.layer')
-					.data(layeredData);
+					var layers = svg.selectAll('.layer')
+						.data(layeredData);
 
-				layers.enter().append('g')
-					.attr('class', function(d, i) {
-						return 'layer ' + d.id; 
-					})
-					.attr('height', height)
-					.attr('style', function(d, i) { return 'fill:'+colours[i]+';'; });
+					layers.exit().remove();
 
+					layers.enter().append('g')
+						.attr('class', 'layer')
+						.attr('height', height)
+						.attr('style', function(d, i) { return 'fill:'+colours[i]+';'; });
 
-				var rect = layers.selectAll('rect').data(function(d) {
-					return d.values;
-				}, function(d) {
-					return d.x;
-				});
+					var rect = layers.selectAll('rect').data(function(d) {
+						return d.values;
+					}, function(d) {
+						return d.x;
+					});
 
-				rect.enter().append('rect')
-					.attr('x', function(d) { return x(d.x) - width/points*0.9/2 })
-					.attr('width', width/points*0.9)
-					.attr('y', function(d) { return y(d.y0 + d.y); })
-					.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)})
-					.on('mouseover', tip.show)
-					.on('mouseout', tip.hide);
-			}
-		});
+					var bar_width = width/points*0.9;
+
+					// all the points will be removed due to the fact the x key updates
+					rect.exit().remove();
+
+					rect.enter().append('rect')
+						.attr('x', function(d) { return x(d.x) - bar_width/2 })
+						.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)})
+						.attr('width', bar_width)
+						.attr('y', function(d) { return y(d.y0 + d.y); })
+						.on('mouseover', tip.show)
+						.on('mouseout', tip.hide);
+				}
+			});
+		}
+
+		draw();
+		setInterval(draw, 30*1000);
 	},
 
 	init_dash: function() {
@@ -283,10 +287,6 @@ var Dash = {
 
 		this['generate_'+w.type](w);
 		console.log('widget', w)
-	/*	w.interval = setInterval(function() {
-			that['generate_'+w.type](w);
-			console.log('new '+w.type+' for', w.name);
-		}, 6*60*1000); // TODO fix this when widgets are better structured */
 	},
 
 	get_dash: function(token) {

@@ -47,9 +47,10 @@
       nodel.html(content)
         .style({ opacity: 1, 'pointer-events': 'all' })
   
+
       coords = direction_n();
       nodel.classed('n', true).style({
-        top: (coords.top +  poffset[0]) + scrollTop + 'px',
+        top: Math.max((coords.top +  poffset[0]) + scrollTop, 1) + 'px',
         left: (coords.left + poffset[1]) + scrollLeft + 'px'
       })
   
