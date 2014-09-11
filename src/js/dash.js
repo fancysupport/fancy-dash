@@ -80,25 +80,28 @@ var Dash = {
 		return stack;
 	},
 
-	generate_legend: function(parent, data) {
-		parent.className = 'legend';
-		var datas = data.hasOwnProperty('datasets') ? data.datasets : data;
+	generate_legend: function(parent, layers) {
+		var colours = [
+			'#a8bacf',
+			'#bd9cb7',
+			'#ef9f9f'
+		];
 
-		// remove possible children of the parent
-		while (parent.firstChild) {
-			parent.removeChild(parent.firstChild);
-		}
+		parent.select('.legend').remove();
 
-		datas.forEach(function(d) {
-			var title = document.createElement('span');
-			title.className = 'title';
-			title.style.borderColor = d.hasOwnProperty('strokeColor') ? d.strokeColor : d.color;
-			title.style.borderStyle = 'solid';
-			parent.appendChild(title);
-
-			var text = document.createTextNode(d.label);
-			title.appendChild(text);
+		var data = {};
+		data.total = d3.sum(layers, function(layer, i) {
+			var t = d3.sum(layer.values, function(d) {
+				return d.y;
+			});
+			layer.total = t;
+			layer.colour = colours[i];
+			return t;
 		});
+		data.layers = layers;
+
+		parent.append('div').attr('class', 'legend')
+			.html(Templates.legend_totals(data));
 	},
 
 	generate_line: function(widget) {
@@ -124,7 +127,7 @@ var Dash = {
 			'#ef9f9f'
 		];
 
-		var margin = {top: 20, right: 10, bottom: 23, left: 30};
+		var margin = {top: 20, right: 10, bottom: 25, left: 30};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
@@ -141,7 +144,8 @@ var Dash = {
 
 		var yAxis = d3.svg.axis()
 			.scale(y)
-			.ticks(Math.round(height/20))
+			//.ticks(Math.round(height/20))
+			.ticks(5)
 			.orient('left')
 			.tickSize(-width, -width, 0)
 			.tickPadding(5)
@@ -233,7 +237,7 @@ var Dash = {
 					layers.exit().remove();
 
 					layers.enter().append('g')
-						.attr('class', 'layer')
+						.attr('class', 'layer cf')
 						.attr('height', height)
 						.attr('style', function(d, i) { return 'fill:'+colours[i]+';'; });
 
@@ -255,12 +259,14 @@ var Dash = {
 						.attr('y', function(d) { return y(d.y0 + d.y); })
 						.on('mouseover', tip.show)
 						.on('mouseout', tip.hide);
+
+					that.generate_legend(node, layeredData);
 				}
 			});
 		}
 
 		draw();
-		setInterval(draw, 30*1000);
+		setInterval(draw, 60*1000);
 	},
 
 	init_dash: function() {

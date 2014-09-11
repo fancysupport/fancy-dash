@@ -24,16 +24,41 @@ body
 		top 30px
 		left 10px
 
-	.legend
+	svg
 		position absolute
-		top 5px
-		left 5px
 
-		.title
-			margin 0.5em
-			border-width 0 0 0 1em
-			padding 0 0.3em
+	.legend
+		float right
+		margin-top 5px
 
+		li
+			display inline-block
+			margin-left 0
+			white-space nowrap
+
+			&:first-child
+				span
+					position relative
+					bottom -1px
+					font-weight 700
+					font-size 16px
+
+
+		.total, .title
+			color #A5A5A5
+			font-size 0.8em
+			text-transform uppercase
+
+		.value
+			margin-right 10px
+			margin-left 3px
+
+			.key
+				border 1px solid transparent
+				display inline-block
+				height 10px
+				margin-left 5px
+				width 10px
 
 .layer rect
 	z-index 4

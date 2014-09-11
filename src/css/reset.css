@@ -107,11 +107,6 @@ img {
     vertical-align: middle;
 }
 
-.hidden {
-    display: none !important;
-    visibility: hidden;
-}
-
 .clearfix:before,
 .clearfix:after {
     content: " ";
