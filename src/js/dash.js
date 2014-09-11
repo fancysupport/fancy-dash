@@ -65,7 +65,7 @@ var Dash = {
 		return end;
 	},
 
-	ts2: function(sources, points, period) {
+	generate_layered_series: function(sources, points, period) {
 		var stack = [];
 		for (var i=0; i<sources.length; i++) {
 			stack[i] = {
@@ -76,7 +76,7 @@ var Dash = {
 				})
 			}
 		}
-		console.log('stack', stack);
+		stack.sort(function(a,b){return a.id>b.id})
 		return stack;
 	},
 
@@ -124,7 +124,7 @@ var Dash = {
 			'#ef9f9f'
 		];
 
-		var margin = {top: 20, right: 30, bottom: 30, left: 40};
+		var margin = {top: 20, right: 15, bottom: 25, left: 40};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
@@ -155,21 +155,12 @@ var Dash = {
 			.append('g')
 				.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		var tip = d3.tip()
-			.attr('class', 'd3-tip')
-			.html(function(d) {
-				return that.timeago(d.key/1000) + ': ' + format(d.value);
-				//return new Date(+d.key).toString() + ': ' + format(d.value);
-			});
-		svg.call(tip);
-
 		var stack = d3.layout.stack().values(function(d) {
 			return d.values;
 		});
 
 		this.get_widget_data(widget.id, function(ok, err) {
 			if (ok && ok.data) {
-				console.log(ok.data)
 				var sources = [];
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
@@ -180,9 +171,8 @@ var Dash = {
 					}
 				}
 
-				var data = that.ts2(sources, points, period);
+				var data = that.generate_layered_series(sources, points, period);
 				var layeredData = stack(data);
-				console.log(layeredData);
 				
 				// remove previous stuff in prep for redraw
 				node.selectAll('svg > g > *').remove();
@@ -209,6 +199,12 @@ var Dash = {
 				// TODO change points/4 to more generic
 				svg.selectAll('.x.axis > .tick')
 					.each(function(d, i) {
+						if (width < 200) {
+							if (i !== 0 && i !== points-1)
+								this.remove();
+							return;
+						}
+
 						if (i % Math.floor(points/4) !== 0)
 							this.remove();
 					});
@@ -223,6 +219,17 @@ var Dash = {
 					.attr('class', 'y grid')
 					.call(yAxis.tickSize(-width, 0, 0).tickFormat(''))
 					.select('g').remove()
+
+				var tip = d3.tip()
+					.attr('class', 'd3-tip')
+					.html(function(d, e) {
+						var s = that.timeago(+d.x/1000)
+						for (var i=0; i<layeredData.length; i++) {
+							s += '<br/>' + layeredData[i].name + ': ' + format(layeredData[i].values[e].y);
+						}
+						return s;
+					});
+				svg.call(tip);
 
 				var layers = svg.selectAll('.layer')
 					.data(layeredData);
@@ -245,7 +252,9 @@ var Dash = {
 					.attr('x', function(d) { return x(d.x) - width/points*0.9/2 })
 					.attr('width', width/points*0.9)
 					.attr('y', function(d) { return y(d.y0 + d.y); })
-					.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)});
+					.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)})
+					.on('mouseover', tip.show)
+					.on('mouseout', tip.hide);
 			}
 		});
 	},
@@ -273,11 +282,11 @@ var Dash = {
 		if (['line','bar'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
-		console.log(w)
-		w.interval = setInterval(function() {
+		console.log('widget', w)
+	/*	w.interval = setInterval(function() {
 			that['generate_'+w.type](w);
 			console.log('new '+w.type+' for', w.name);
-		}, 6*60*1000); // TODO fix this when widgets are better structured
+		}, 6*60*1000); // TODO fix this when widgets are better structured */
 	},
 
 	get_dash: function(token) {
@@ -287,7 +296,7 @@ var Dash = {
 			method: 'GET',
 			url: '/dashboards/' + token
 		}, function(ok, err) {
-			console.log(ok, err);
+			console.log('dash', ok, err);
 
 			if (ok)	{
 				that.active = ok.data;

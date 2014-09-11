@@ -17,8 +17,7 @@
   //
   // Returns a tip
   return function() {
-    var direction = d3_tip_direction,
-        offset    = d3_tip_offset,
+    var offset    = d3_tip_offset,
         html      = d3_tip_html,
         node      = initNode(),
         svg       = null,
@@ -40,9 +39,7 @@
   
       var content = html.apply(this, args),
           poffset = offset.apply(this, args),
-          dir     = direction.apply(this, args),
           nodel   = d3.select(node),
-          i       = directions.length,
           coords,
           scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
           scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
@@ -50,9 +47,8 @@
       nodel.html(content)
         .style({ opacity: 1, 'pointer-events': 'all' })
   
-      while(i--) nodel.classed(directions[i], false)
-      coords = direction_callbacks.get(dir).apply(this)
-      nodel.classed(dir, true).style({
+      coords = direction_n();
+      nodel.classed('n', true).style({
         top: (coords.top +  poffset[0]) + scrollTop + 'px',
         left: (coords.left + poffset[1]) + scrollLeft + 'px'
       })
@@ -64,7 +60,7 @@
     //
     // Returns a tip
     tip.hide = function() {
-      nodel = d3.select(node)
+      var nodel = d3.select(node)
       nodel.style({ opacity: 0, 'pointer-events': 'none' })
       return tip
     }
@@ -103,19 +99,6 @@
       return tip
     }
   
-    // Public: Set or get the direction of the tooltip
-    //
-    // v - One of n(north), s(south), e(east), or w(west), nw(northwest),
-    //     sw(southwest), ne(northeast) or se(southeast)
-    //
-    // Returns tip or direction
-    tip.direction = function(v) {
-      if (!arguments.length) return direction
-      direction = v == null ? v : d3.functor(v)
-  
-      return tip
-    }
-  
     // Public: Sets or gets the offset of the tip
     //
     // v - Array of [x, y] offset
@@ -140,84 +123,14 @@
       return tip
     }
   
-    function d3_tip_direction() { return 'n' }
     function d3_tip_offset() { return [0, 0] }
     function d3_tip_html() { return ' ' }
-  
-    var direction_callbacks = d3.map({
-      n:  direction_n,
-      s:  direction_s,
-      e:  direction_e,
-      w:  direction_w,
-      nw: direction_nw,
-      ne: direction_ne,
-      sw: direction_sw,
-      se: direction_se
-    }),
-  
-    directions = direction_callbacks.keys()
-  
+
     function direction_n() {
       var bbox = getScreenBBox()
       return {
         top:  bbox.n.y - node.offsetHeight,
         left: bbox.n.x - node.offsetWidth / 2
-      }
-    }
-  
-    function direction_s() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.s.y,
-        left: bbox.s.x - node.offsetWidth / 2
-      }
-    }
-  
-    function direction_e() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.e.y - node.offsetHeight / 2,
-        left: bbox.e.x
-      }
-    }
-  
-    function direction_w() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.w.y - node.offsetHeight / 2,
-        left: bbox.w.x - node.offsetWidth
-      }
-    }
-  
-    function direction_nw() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.nw.y - node.offsetHeight,
-        left: bbox.nw.x - node.offsetWidth
-      }
-    }
-  
-    function direction_ne() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.ne.y - node.offsetHeight,
-        left: bbox.ne.x
-      }
-    }
-  
-    function direction_sw() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.sw.y,
-        left: bbox.sw.x - node.offsetWidth
-      }
-    }
-  
-    function direction_se() {
-      var bbox = getScreenBBox()
-      return {
-        top:  bbox.se.y,
-        left: bbox.e.x
       }
     }
   
