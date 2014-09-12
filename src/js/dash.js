@@ -80,18 +80,8 @@ var Dash = {
 		return stack;
 	},
 
-	generate_legend: function(parent, layers) {
+	generate_legend: function(parent, data) {
 		parent.select('.legend').remove();
-
-		var data = {};
-		data.total = d3.sum(layers, function(layer, i) {
-			var t = d3.sum(layer.values, function(d) {
-				return d.y;
-			});
-			layer.total = t;
-			return t;
-		});
-		data.layers = layers;
 
 		parent.append('div').attr('class', 'legend cf')
 			.html(Templates.legend_totals(data));
@@ -125,7 +115,7 @@ var Dash = {
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
 		var x = d3.scale.linear()
-			.rangeRound([0, width]);
+			.range([0, width]);
 
 		var y = d3.scale.linear()
 			.range([height, 0]);
@@ -264,7 +254,17 @@ var Dash = {
 						return d.y === 0;
 					}).remove();
 
-					that.generate_legend(node, layeredData);
+					var legend = {};
+					legend.total = d3.sum(layeredData, function(layer, i) {
+						var t = d3.sum(layer.values, function(d) {
+							return d.y;
+						});
+						layer.total = t;
+						return t;
+					});
+					legend.layers = layeredData;
+
+					that.generate_legend(node, legend);
 				}
 			});
 		}
