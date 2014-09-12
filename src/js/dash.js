@@ -81,12 +81,6 @@ var Dash = {
 	},
 
 	generate_legend: function(parent, layers) {
-		var colours = [
-			'#a8bacf',
-			'#bd9cb7',
-			'#ef9f9f'
-		];
-
 		parent.select('.legend').remove();
 
 		var data = {};
@@ -95,12 +89,11 @@ var Dash = {
 				return d.y;
 			});
 			layer.total = t;
-			layer.colour = colours[i];
 			return t;
 		});
 		data.layers = layers;
 
-		parent.append('div').attr('class', 'legend')
+		parent.append('div').attr('class', 'legend cf')
 			.html(Templates.legend_totals(data));
 	},
 
@@ -122,12 +115,12 @@ var Dash = {
 		var period = 60*60*1000;
 		var points = 25;
 		var colours = [
-			'#a8bacf',
-			'#bd9cb7',
-			'#ef9f9f'
+			'#FF9F29',
+			'#FF742E',
+			'#F55332'
 		];
 
-		var margin = {top: 20, right: 10, bottom: 25, left: 30};
+		var margin = {top: 20, right: 10, bottom: 35, left: 40};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
@@ -139,16 +132,17 @@ var Dash = {
 
 		var xAxis = d3.svg.axis()
 			.scale(x)
+			.tickSize(0, 0, 0)
+			.tickPadding(12)
 			.tickFormat(function(d) { return that.timeago(d/1000); })
 			.orient('bottom');
 
 		var yAxis = d3.svg.axis()
 			.scale(y)
-			//.ticks(Math.round(height/20))
 			.ticks(5)
 			.orient('left')
 			.tickSize(-width, -width, 0)
-			.tickPadding(5)
+			.tickPadding(8)
 			.tickFormat(function(d) {
 				var p = d3.formatPrefix(d);
 				return p.scale(d) + p.symbol;
@@ -180,7 +174,7 @@ var Dash = {
 		function draw() {
 			that.get_widget_data(widget.id, function(ok, err) {
 				if (ok && ok.data) {
-					console.log('new data');
+					console.log('new data', ok.data);
 					var sources = [];
 					for (var i=0; i<ok.data.length; i++) {
 						for (var j=0; j<widget.sources.length; j++) {
@@ -194,10 +188,13 @@ var Dash = {
 					if (sources.length === 0) return;
 
 					var data = that.generate_layered_series(sources, points, period);
+					for (var i=0; i<data.length; i++) {
+						data[i].colour = colours[i];
+					}
 					var layeredData = stack(data);
 
 					// an extra period at either end for padding?
-					x.domain([Date.now()-points*period, Date.now()+period]);
+					x.domain([Date.now()-points*period+period, Date.now()+period]);
 
 					// make domain slightly larger than the actual data
 					y.domain([0, d3.max(layeredData, function(layer) {
@@ -226,7 +223,9 @@ var Dash = {
 					tip.html(function(d, e) {
 						var s = that.timeago(+d.x/1000)
 						for (var i=0; i<layeredData.length; i++) {
-							s += '<br/>' + layeredData[i].name + ': ' + format(layeredData[i].values[e].y);
+							s += '<br/>' + '<span class="value">' + format(layeredData[i].values[e].y);
+							s += '<span class="key" style="background-color:' + layeredData[i].colour + ';">';
+							s += '</span></span>';
 						}
 						return s;
 					});
@@ -237,9 +236,9 @@ var Dash = {
 					layers.exit().remove();
 
 					layers.enter().append('g')
-						.attr('class', 'layer cf')
+						.attr('class', 'layer')
 						.attr('height', height)
-						.attr('style', function(d, i) { return 'fill:'+colours[i]+';'; });
+						.attr('style', function(d, i) { return 'fill:'+layeredData[i].colour+';'; });
 
 					var rect = layers.selectAll('rect').data(function(d) {
 						return d.values;
@@ -259,6 +258,11 @@ var Dash = {
 						.attr('y', function(d) { return y(d.y0 + d.y); })
 						.on('mouseover', tip.show)
 						.on('mouseout', tip.hide);
+
+					// remove all the bars that have no data
+					rect.filter(function(d) {
+						return d.y === 0;
+					}).remove();
 
 					that.generate_legend(node, layeredData);
 				}
