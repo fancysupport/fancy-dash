@@ -6,7 +6,9 @@ var stylus = require('gulp-stylus');
 var concat = require('gulp-concat');
 var livereload = require('gulp-livereload');
 var header = require('gulp-header');
-var dot = require('gulp-dot-precompiler')
+var dot = require('gulp-dot-precompiler');
+
+var exec = require('child_process').exec;
 
 var notifier = require('node-notifier');
 var express = require('express');
@@ -48,8 +50,15 @@ gulp.task('dot', function() {
 		.pipe(gulp.dest('src/js'));
 });
 
-gulp.task('js', ['dot'], function() {
-	return gulp.src('src/**/*.js')
+gulp.task('smash', ['dot'], function(cb) {
+	exec('smash src/js/dash.js > build/dash.js', function(err) {
+		if (err) handle_error(err);
+		cb();
+	});
+});
+
+gulp.task('js', ['smash'], function() {
+	return gulp.src('build/dash.js')
 		.pipe(concat('dash.js'))
 		.pipe(gulp.dest('dist/assets'));
 });
@@ -93,7 +102,7 @@ gulp.task('minify', ['min_js', 'min_css']);
 gulp.task('watch', function() {
 	livereload.listen();
 
-	gulp.watch('src/js/**/*', ['min_js']).on('change', function(f) {
+	gulp.watch('src/js/**/*.js', ['min_js']).on('change', function(f) {
 		livereload().changed(f.path);
 	});
 
