@@ -97,7 +97,7 @@ gulp.task('watch', function() {
 		livereload().changed(f.path);
 	});
 
-	gulp.watch('src/css/**/*', ['min_css']);
+	gulp.watch('src/css/**/*', ['stylus']);
 	gulp.watch('src/views/**/*', ['dot']);
 
 	gulp.watch('dist/assets/css/*').on('change', function(f) {

@@ -1,0 +1,18 @@
+{{ var f=d3.format('.4s'); }}
+
+<ul>
+	<li>
+		<span class="total">total</span>
+		<span class="value">{{= f(data.total) }}</span>
+	</li>
+
+	{{~ data.layers :m }}
+		<li>
+			<span class="title">{{= m.name }}</span>
+			<span class="value">
+				{{= f(m.total) }}
+				<span class="key" style="background-color:{{= m.colour }}"></span>
+			</span>
+		</li>
+	{{~}}
+</ul>

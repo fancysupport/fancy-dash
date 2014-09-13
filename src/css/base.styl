@@ -15,7 +15,7 @@ body
 
 .widget
 	position absolute
-	background-color #ddd
+	border 1px solid black
 	z-index 3
 	margin 10px
 
@@ -24,12 +24,92 @@ body
 		top 30px
 		left 10px
 
-	.legend
+	svg
 		position absolute
-		top 5px
-		left 5px
 
-		.title
-			margin 0.5em
-			border-width 0 0 0 1em
-			padding 0 0.3em
+	.legend
+		float right
+		margin-top 5px
+
+		li
+			display inline-block
+			margin-left 0
+			white-space nowrap
+
+			&:first-child
+				span
+					position relative
+					bottom -1px
+					font-weight 700
+					font-size 16px
+
+
+		.total, .title
+			color darken(#A5A5A5, 10)
+			font-size 0.8em
+			text-transform uppercase
+
+		.value
+			margin-right 10px
+			margin-left 3px
+
+			.key
+				border 1px solid transparent
+				display inline-block
+				height 10px
+				margin-left 5px
+				width 10px
+
+.layer
+	.line
+		fill none;
+		stroke-width 2px
+
+	.circle
+		stroke #F7F7F7
+		stroke-width 2
+
+.axis
+	line
+		fill none
+		stroke #A5A5A5
+		stroke-width 1px
+		stroke-opacity 0.7
+		shape-rendering crispEdges
+	text
+		fill darken(#A5A5A5, 20)
+		font 12px sans-serif
+
+.d3-tip
+	z-index 5
+	line-height 1
+	font-weight bold
+	padding 12px
+	background rgba(0, 0, 0, 0.8)
+	color #fff
+	border-radius 2px
+	pointer-events none
+	text-align center
+
+	.key
+		display inline-block
+		height 10px
+		margin-left 5px
+		width 10px
+
+.d3-tip:after
+	box-sizing border-box
+	display inline
+	font-size 10px
+	width 100%
+	line-height 1
+	color rgba(0, 0, 0, 0.8)
+	position absolute
+	pointer-events none
+
+.d3-tip.n:after
+	content "\25BC"
+	margin -1px 0 0 0
+	top 100%
+	left 0
+	text-align center

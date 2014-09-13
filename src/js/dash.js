@@ -50,9 +50,9 @@ var Dash = {
 			end[now-i*period] = 0;
 		}
 
-		for (orig in data) {
-			for (time in end) {
-				if (orig*1000 >= time && Math.abs(orig*1000-time) < period) {
+		for (var orig in data) {
+			for (var time in end) {
+				if (Math.abs(orig*1000-time) < period) {
 					end[time] = data[orig];
 					break;
 				}
@@ -65,104 +65,372 @@ var Dash = {
 		return end;
 	},
 
-	generate_legend: function(parent, data) {
-		parent.className = 'legend';
-		var datas = data.hasOwnProperty('datasets') ? data.datasets : data;
-
-		// remove possible children of the parent
-		while (parent.firstChild) {
-			parent.removeChild(node.firstChild);
+	generate_layered_series: function(sources, points, period) {
+		var stack = [];
+		for (var i=0; i<sources.length; i++) {
+			stack[i] = {
+				id: sources[i].id,
+				name: sources[i].name,
+				values: this.generate_timeseries(sources[i].data, points, period).map(function(e) {
+					return {x: e.key, y: e.value};
+				})
+			}
 		}
+		stack.sort(function(a,b){return a.id>b.id})
+		return stack;
+	},
 
-		datas.forEach(function(d) {
-			var title = document.createElement('span');
-			title.className = 'title';
-			title.style.borderColor = d.hasOwnProperty('strokeColor') ? d.strokeColor : d.color;
-			title.style.borderStyle = 'solid';
-			parent.appendChild(title);
+	generate_legend: function(parent, data) {
+		parent.select('.legend').remove();
 
-			var text = document.createTextNode(d.label);
-			title.appendChild(text);
-		});
+		parent.append('div').attr('class', 'legend cf')
+			.html(Templates.legend_totals(data));
 	},
 
 	generate_line: function(widget) {
-		this.generate_chart({
-			widget: widget,
-			type: 'Line',
-			options: {
-				scaleVerticalGridLines:false,
-				skipXLabels: 6,
-				bezierCurve: false,
-				animation: widget.chart ? false : true
-			},
-			datasets: [{
-				label: 'todo labels',
-				fillColor: "rgba(169,169,169,0.4)",
-				strokeColor: "rgba(169,169,169,1)",
-				pointColor: "rgba(169,169,169,1)",
-				pointStrokeColor: "#fff",
-				pointHighlightFill: "#fff",
-				pointHighlightStroke: "rgba(169,169,169,1)"
-			}]
+		var that = this;
+		var format = d3.format('.4s');
+
+		var period = 60*60*1000;
+		var points = 25;
+		var colours = [
+			'#FF9F29',
+			'#FF742E',
+			'#F55332'
+		];
+
+		var margin = {top: 20, right: 10, bottom: 35, left: 40};
+		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
+		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
+
+		var x = d3.scale.linear()
+			.range([0, width]);
+
+		var y = d3.scale.linear()
+			.range([height, 0]);
+
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.tickSize(0, 0, 0)
+			.tickPadding(12)
+			.tickFormat(function(d) { return that.timeago(d/1000); })
+			.orient('bottom');
+
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.ticks(5)
+			.orient('left')
+			.tickSize(-width, -width, 0)
+			.tickPadding(8)
+			.tickFormat(function(d) {
+				var p = d3.formatPrefix(d);
+				return p.scale(d) + p.symbol;
+			});
+
+		var node = d3.select('[data-id=' + widget.name + ']')
+		var svg = node.append('svg')
+				.attr('width', width + margin.left + margin.right)
+				.attr('height', height + margin.top + margin.bottom)
+			.append('g')
+				.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		var stack = d3.layout.stack().values(function(d) {
+			return d.values;
 		});
+
+		line = d3.svg.line()
+			.interpolate('linear')
+			.x(function(d) { return x(d.x); })
+			.y(function(d) { return y(d.y); });
+
+		svg.append('g')
+			.attr('class', 'x axis')
+			.attr('transform', 'translate(0,' + height + ')');
+
+		svg.append('g')
+			.attr('class', 'y axis')
+
+		var tip = d3.tip()
+			.attr('class', 'd3-tip');
+
+		svg.call(tip);
+
+		function draw() {
+			that.get_widget_data(widget.id, function(ok, err) {
+				if (ok && ok.data) {
+					console.log('new data');
+					var sources = [];
+					for (var i=0; i<ok.data.length; i++) {
+						for (var j=0; j<widget.sources.length; j++) {
+							if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
+								ok.data[i].name = widget.sources[j].name;
+								sources.push(ok.data[i]);
+							}
+						}
+					}
+
+					if (sources.length === 0) return;
+
+					var data = that.generate_layered_series(sources, points, period);
+					for (var i=0; i<data.length; i++) {
+						data[i].colour = colours[i];
+					}
+					var layeredData = stack(data);
+
+					// an extra period at either end for padding?
+					x.domain([Date.now()-points*period+period, Date.now()+period]);
+
+					// make domain slightly larger than the actual data
+					y.domain([0, d3.max(layeredData, function(layer) {
+						return d3.max(layer.values, function(d) {
+							return d.y;
+						}) * 1.1;
+					})]);
+
+					xAxis.tickValues(data[0].values.map(function(d) { return d.x; }));
+					svg.select('.x.axis').call(xAxis);
+					svg.select('.y.axis').call(yAxis);
+
+					// remove most of the ticks
+					svg.selectAll('.x.axis > .tick')
+						.each(function(d, i) {
+							if (width < 200) {
+								if (i !== 0 && i !== points-1)
+									this.remove();
+								return;
+							}
+
+							if (i % Math.floor(points/4) !== 0)
+								this.remove();
+						});
+
+					tip.html(function(d, e) {
+						var s = that.timeago(+d.x/1000)
+						for (var i=0; i<layeredData.length; i++) {
+							s += '<br/>' + '<span class="value">' + format(layeredData[i].values[e].y);
+							s += '<span class="key" style="background-color:' + layeredData[i].colour + ';">';
+							s += '</span></span>';
+						}
+						return s;
+					});
+
+					svg.selectAll('.layer').remove(); // clear out the old
+					var layers = svg.selectAll('.layer')
+						.data(layeredData)
+					.enter().append('g')
+						.attr('class', 'layer');
+
+					layers.selectAll('path').remove();
+					layers.append('path')
+						.attr('class', 'line')
+						.attr('d', function(d) { return line(d.values); })
+						.style("stroke", function(d, i) { return layeredData[i].colour; });
+
+					var circle = layers.selectAll('circle').data(function(d) {
+						return d.values;
+					});
+
+					circle.enter().append('circle')
+						.attr('class', 'circle')
+						.attr('cx', function(d) { return x(d.x); })
+						.attr('cy', function(d) { return y(d.y); })
+						.attr('r', 5)
+						.style('fill', function(d, e, i) { return layeredData[i].colour; })
+						.on('mouseover', tip.show)
+						.on('mouseout', tip.hide);
+
+					var legend = {};
+					legend.total = d3.sum(layeredData, function(layer, i) {
+						var t = d3.sum(layer.values, function(d) {
+							return d.y;
+						});
+						layer.total = t;
+						return t;
+					});
+					legend.layers = layeredData;
+
+					that.generate_legend(node, legend);
+				}
+			});
+		}
+
+		draw();
+		setInterval(draw, 60*1000);
 	},
 
 	generate_bar: function(widget) {
-		this.generate_chart({
-			widget: widget,
-			type: 'Bar',
-			options: {
-				scaleVerticalGridLines:false,
-				skipXLabels: 6,
-				animation: widget.chart ? false : true
-			},
-			datasets: [{
-				label: 'todo label',
-				fillColor: "rgba(169,169,169,0.4)",
-				strokeColor: "rgba(169,169,169,1)",
-				highlightFill: "rgba(169,169,169,0.75)",
-				highlightStroke: "rgba(169,169,169,1)"
-			}]
-		});
-	},
-
-	generate_chart: function(opts) {
 		var that = this;
-
-		var node = this.qs('[data-id='+opts.widget.name+']');
-		var ctx = node.querySelector('canvas').getContext('2d');
-		var legend = node.querySelector('.legend');
+		var format = d3.format('.4s');
 
 		var period = 60*60*1000;
-		var points = 24+1;
+		var points = 25;
+		var colours = [
+			'#FF9F29',
+			'#FF742E',
+			'#F55332'
+		];
 
-		var values;
+		var margin = {top: 20, right: 10, bottom: 35, left: 40};
+		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
+		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
-		opts.widget.period = period * 0.1;
+		var x = d3.scale.linear()
+			.range([0, width]);
 
-		this.get_widget_data(opts.widget.name, function(ok, err) {
-			if (ok && ok.data) {
-				for (var i=0; i<ok.data.length; i++) {
-					values = that.generate_timeseries(ok.data[i].dps, points, period);
-					opts.datasets[i].data = values.map(function(e) { return e.value; });
-				}
+		var y = d3.scale.linear()
+			.range([height, 0]);
 
-				var data = {
-					labels: values.map(function(e, i) {
-						return that.timeago(parseInt(e.key, 10)/1000);
-					}),
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.tickSize(0, 0, 0)
+			.tickPadding(12)
+			.tickFormat(function(d) { return that.timeago(d/1000); })
+			.orient('bottom');
 
-					datasets: opts.datasets
-				};
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.ticks(5)
+			.orient('left')
+			.tickSize(-width, -width, 0)
+			.tickPadding(8)
+			.tickFormat(function(d) {
+				var p = d3.formatPrefix(d);
+				return p.scale(d) + p.symbol;
+			});
 
-				that.generate_legend(legend, data);
+		var node = d3.select('[data-id=' + widget.name + ']')
+		var svg = node.append('svg')
+				.attr('width', width + margin.left + margin.right)
+				.attr('height', height + margin.top + margin.bottom)
+			.append('g')
+				.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-				if (opts.widget.chart) opts.widget.chart.destroy();
-
-				opts.widget.chart = new Chart(ctx)[opts.type](data, opts.options);
-			}
+		var stack = d3.layout.stack().values(function(d) {
+			return d.values;
 		});
+
+		svg.append('g')
+			.attr('class', 'x axis')
+			.attr('transform', 'translate(0,' + height + ')');
+
+		svg.append('g')
+			.attr('class', 'y axis')
+
+		var tip = d3.tip()
+			.attr('class', 'd3-tip');
+
+		svg.call(tip);
+
+		function draw() {
+			that.get_widget_data(widget.id, function(ok, err) {
+				if (ok && ok.data) {
+					console.log('new data');
+					var sources = [];
+					for (var i=0; i<ok.data.length; i++) {
+						for (var j=0; j<widget.sources.length; j++) {
+							if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
+								ok.data[i].name = widget.sources[j].name;
+								sources.push(ok.data[i]);
+							}
+						}
+					}
+
+					if (sources.length === 0) return;
+
+					var data = that.generate_layered_series(sources, points, period);
+					for (var i=0; i<data.length; i++) {
+						data[i].colour = colours[i];
+					}
+					var layeredData = stack(data);
+
+					// an extra period at either end for padding?
+					x.domain([Date.now()-points*period+period, Date.now()+period]);
+
+					// make domain slightly larger than the actual data
+					y.domain([0, d3.max(layeredData, function(layer) {
+						return d3.max(layer.values, function(d) {
+							return d.y0 + d.y;
+						}) * 1.1;
+					})]);
+
+					xAxis.tickValues(data[0].values.map(function(d) { return d.x; }));
+					svg.select('.x.axis').call(xAxis);
+					svg.select('.y.axis').call(yAxis);
+
+					// remove most of the ticks
+					svg.selectAll('.x.axis > .tick')
+						.each(function(d, i) {
+							if (width < 200) {
+								if (i !== 0 && i !== points-1)
+									this.remove();
+								return;
+							}
+
+							if (i % Math.floor(points/4) !== 0)
+								this.remove();
+						});
+
+					tip.html(function(d, e) {
+						var s = that.timeago(+d.x/1000)
+						for (var i=0; i<layeredData.length; i++) {
+							s += '<br/>' + '<span class="value">' + format(layeredData[i].values[e].y);
+							s += '<span class="key" style="background-color:' + layeredData[i].colour + ';">';
+							s += '</span></span>';
+						}
+						return s;
+					});
+
+					var layers = svg.selectAll('.layer')
+						.data(layeredData);
+
+					layers.exit().remove();
+
+					layers.enter().append('g')
+						.attr('class', 'layer')
+						.attr('height', height)
+						.attr('style', function(d, i) { return 'fill:'+layeredData[i].colour+';'; });
+
+					var rect = layers.selectAll('rect').data(function(d) {
+						return d.values;
+					}, function(d) {
+						return d.x;
+					});
+
+					var bar_width = width/points*0.9;
+
+					// all the points will be removed due to the fact the x key updates
+					rect.exit().remove();
+
+					rect.enter().append('rect')
+						.attr('x', function(d) { return x(d.x) - bar_width/2 })
+						.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)})
+						.attr('width', bar_width)
+						.attr('y', function(d) { return y(d.y0 + d.y); })
+						.on('mouseover', tip.show)
+						.on('mouseout', tip.hide);
+
+					// remove all the bars that have no data
+					rect.filter(function(d) {
+						return d.y === 0;
+					}).remove();
+
+					var legend = {};
+					legend.total = d3.sum(layeredData, function(layer, i) {
+						var t = d3.sum(layer.values, function(d) {
+							return d.y;
+						});
+						layer.total = t;
+						return t;
+					});
+					legend.layers = layeredData;
+
+					that.generate_legend(node, legend);
+				}
+			});
+		}
+
+		draw();
+		setInterval(draw, 60*1000);
 	},
 
 	init_dash: function() {
@@ -179,7 +447,7 @@ var Dash = {
 		var that = this;
 
 		// assign to list to keep track easier
-		this.widgets[w.name] = w;
+		this.widgets[w.id] = w;
 
 		this.render_widget(w);
 
@@ -188,11 +456,7 @@ var Dash = {
 		if (['line','bar'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
-
-		w.interval = setInterval(function() {
-			that['generate_'+w.type](w);
-			console.log('new '+w.type+' for', w.name);
-		}, w.period);
+		console.log('widget', w)
 	},
 
 	get_dash: function(token) {
@@ -202,7 +466,7 @@ var Dash = {
 			method: 'GET',
 			url: '/dashboards/' + token
 		}, function(ok, err) {
-			console.log(ok, err);
+			console.log('dash', ok, err);
 
 			if (ok)	{
 				that.active = ok.data;
@@ -214,10 +478,10 @@ var Dash = {
 		});
 	},
 
-	get_widget_data: function(name, cb) {
+	get_widget_data: function(id, cb) {
 		this.ajax({
 			method: 'GET',
-			url: '/dashboards/' + this.active.token + '/data/' + name
+			url: '/dashboards/' + this.active.token + '/widgets/' + id + '/data'
 		}, cb);
 	},
 
