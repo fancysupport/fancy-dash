@@ -42,6 +42,10 @@ var Dash = {
 		return document.querySelector(q);
 	},
 
+	generate_times: function(interval) {
+
+	},
+
 	generate_timeseries: function(data, points, period) {
 		var end = {};
 		var now = new Date().getTime();
@@ -99,7 +103,7 @@ var Dash = {
 			'#F55332'
 		];
 
-		var margin = {top: 20, right: 10, bottom: 35, left: 40};
+		var margin = {top: 30, right: 10, bottom: 35, left: 43};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
@@ -138,7 +142,7 @@ var Dash = {
 			return d.values;
 		});
 
-		line = d3.svg.line()
+		var line = d3.svg.line()
 			.interpolate('linear')
 			.x(function(d) { return x(d.x); })
 			.y(function(d) { return y(d.y); });
@@ -156,14 +160,15 @@ var Dash = {
 		svg.call(tip);
 
 		function draw() {
-			that.get_widget_data(widget.id, function(ok, err) {
+			that.get_widget_data(widget, function(ok, err) {
 				if (ok && ok.data) {
-					console.log('new data');
+					console.log('new data line', ok.data);
 					var sources = [];
 					for (var i=0; i<ok.data.length; i++) {
 						for (var j=0; j<widget.sources.length; j++) {
 							if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
 								ok.data[i].name = widget.sources[j].name;
+								if ( ! ok.data[i].data) ok.data[i].data = {};
 								sources.push(ok.data[i]);
 							}
 						}
@@ -178,14 +183,25 @@ var Dash = {
 					var layeredData = stack(data);
 
 					// an extra period at either end for padding?
-					x.domain([Date.now()-points*period+period, Date.now()+period]);
+					x.domain([Date.now()-points*period, Date.now()+period]);
 
-					// make domain slightly larger than the actual data
-					y.domain([0, d3.max(layeredData, function(layer) {
+					var min = d3.min(layeredData, function(layer) {
+						return d3.min(layer.values, function(d) {
+							return d.y;
+						}) * 1.1;
+					});
+
+					var max = d3.max(layeredData, function(layer) {
 						return d3.max(layer.values, function(d) {
 							return d.y;
 						}) * 1.1;
-					})]);
+					});
+
+					if (min > 0) min = 0;
+					if (max < 0) max = 0;
+					if (min === 0 && max === 0) max = 1;
+
+					y.domain([min, max]);
 
 					xAxis.tickValues(data[0].values.map(function(d) { return d.x; }));
 					svg.select('.x.axis').call(xAxis);
@@ -270,7 +286,7 @@ var Dash = {
 			'#F55332'
 		];
 
-		var margin = {top: 20, right: 10, bottom: 35, left: 40};
+		var margin = {top: 30, right: 10, bottom: 35, left: 43};
 		var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 		var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
@@ -322,14 +338,15 @@ var Dash = {
 		svg.call(tip);
 
 		function draw() {
-			that.get_widget_data(widget.id, function(ok, err) {
+			that.get_widget_data(widget, function(ok, err) {
 				if (ok && ok.data) {
-					console.log('new data');
+					console.log('new data bar', ok.data);
 					var sources = [];
 					for (var i=0; i<ok.data.length; i++) {
 						for (var j=0; j<widget.sources.length; j++) {
 							if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
 								ok.data[i].name = widget.sources[j].name;
+								if ( ! ok.data[i].data) ok.data[i].data = {};
 								sources.push(ok.data[i]);
 							}
 						}
@@ -344,14 +361,25 @@ var Dash = {
 					var layeredData = stack(data);
 
 					// an extra period at either end for padding?
-					x.domain([Date.now()-points*period+period, Date.now()+period]);
+					x.domain([Date.now()-points*period, Date.now()+period]);
 
-					// make domain slightly larger than the actual data
-					y.domain([0, d3.max(layeredData, function(layer) {
+					var min = d3.min(layeredData, function(layer) {
+						return d3.min(layer.values, function(d) {
+							return d.y0 + d.y;
+						}) * 1.1;
+					});
+
+					var max = d3.max(layeredData, function(layer) {
 						return d3.max(layer.values, function(d) {
 							return d.y0 + d.y;
 						}) * 1.1;
-					})]);
+					});
+
+					if (min > 0) min = 0;
+					if (max < 0) max = 0;
+					if (min === 0 && max === 0) max = 1;
+
+					y.domain([min, max]);
 
 					xAxis.tickValues(data[0].values.map(function(d) { return d.x; }));
 					svg.select('.x.axis').call(xAxis);
@@ -403,9 +431,9 @@ var Dash = {
 
 					rect.enter().append('rect')
 						.attr('x', function(d) { return x(d.x) - bar_width/2 })
-						.attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y)})
+						.attr('height', function(d) { return Math.abs(y(d.y0) - y(d.y0 + d.y)) })
 						.attr('width', bar_width)
-						.attr('y', function(d) { return y(d.y0 + d.y); })
+						.attr('y', function(d) { return y(Math.max(d.y0, (d.y0 + d.y))); })
 						.on('mouseover', tip.show)
 						.on('mouseout', tip.hide);
 
@@ -476,10 +504,10 @@ var Dash = {
 		});
 	},
 
-	get_widget_data: function(id, cb) {
+	get_widget_data: function(w, cb) {
 		this.ajax({
 			method: 'GET',
-			url: '/dashboards/' + this.active.token + '/widgets/' + id + '/data'
+			url: '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data?t=' + w.config.time + '&a=' + w.config.agg
 		}, cb);
 	},
 

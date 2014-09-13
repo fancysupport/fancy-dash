@@ -33,7 +33,7 @@ for (var i=0; i<(argv.points || 24); i++) {
 		var data = {
 			metric: 'widget.data',
 			timestamp: time(i),
-			value: Math.random() * 100,
+			value: Math.random() * -100,
 			tags: {
 				dash: DASH_ID,
 				ws: SOURCE_IDS[j]
@@ -44,7 +44,7 @@ for (var i=0; i<(argv.points || 24); i++) {
 			url: 'http://162.243.232.110:4242/api/put',
 			method: 'POST',
 			json: data,
-			timeout: 10000
+			timeout: 100000
 		};
 
 		request(options, handle);
