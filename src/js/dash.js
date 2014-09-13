@@ -127,7 +127,7 @@ var Dash = {
 				return p.scale(d) + p.symbol;
 			});
 
-		var node = d3.select('[data-id=' + widget.name + ']')
+		var node = d3.select('[data-id="' + widget.id + '"]')
 		var svg = node.append('svg')
 				.attr('width', width + margin.left + margin.right)
 				.attr('height', height + margin.top + margin.bottom)
@@ -298,7 +298,7 @@ var Dash = {
 				return p.scale(d) + p.symbol;
 			});
 
-		var node = d3.select('[data-id=' + widget.name + ']')
+		var node = d3.select('[data-id="' + widget.id + '"]')
 		var svg = node.append('svg')
 				.attr('width', width + margin.left + margin.right)
 				.attr('height', height + margin.top + margin.bottom)
@@ -450,8 +450,6 @@ var Dash = {
 		this.widgets[w.id] = w;
 
 		this.render_widget(w);
-
-		var node = this.qs('[data-id='+w.name+']');
 
 		if (['line','bar'].indexOf(w.type) === -1) return;
 
