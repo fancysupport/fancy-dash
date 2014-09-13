@@ -43,7 +43,14 @@ var Dash = {
 	},
 
 	generate_times: function(interval) {
+		var times = {
+			minute: {points: 61, period: 1000},
+			hour: {points: 61, period: 1000*60},
+			day: {points:25, period: 1000*60*60},
+			month: {points:31, period: 1000*60*60*24}
+		}
 
+		return times[interval];
 	},
 
 	generate_timeseries: function(data, points, period) {
@@ -70,13 +77,14 @@ var Dash = {
 	},
 
 	generate_layered_series: function(sources, points, period) {
+		var that = this;
 		var stack = [];
 		for (var i=0; i<sources.length; i++) {
 			stack[i] = {
 				id: sources[i].id,
 				name: sources[i].name,
 				values: this.generate_timeseries(sources[i].data, points, period).map(function(e) {
-					return {x: e.key, y: e.value};
+					return {x: e.key, y: e.value, timeago: that.timeago(+e.key)};
 				})
 			}
 		}
@@ -95,8 +103,9 @@ var Dash = {
 		var that = this;
 		var format = d3.format('.4s');
 
-		var period = 60*60*1000;
-		var points = 25;
+		var time = this.generate_times(widget.config.time);
+		var period = time.period;
+		var points = time.points;
 		var colours = [
 			'#FF9F29',
 			'#FF742E',
@@ -117,7 +126,7 @@ var Dash = {
 			.scale(x)
 			.tickSize(0, 0, 0)
 			.tickPadding(12)
-			.tickFormat(function(d) { return that.timeago(d/1000); })
+			.tickFormat(function(d) { return that.timeago(d); })
 			.orient('bottom');
 
 		var yAxis = d3.svg.axis()
@@ -210,18 +219,19 @@ var Dash = {
 					// remove most of the ticks
 					svg.selectAll('.x.axis > .tick')
 						.each(function(d, i) {
+							var p = points-1;
 							if (width < 200) {
-								if (i !== 0 && i !== points-1)
+								if (i !== 0 && i !== p-1)
 									this.remove();
 								return;
 							}
 
-							if (i % Math.floor(points/4) !== 0)
+							if (i !== 0 && i !== p && i !== Math.round(p/2) && i !== Math.round(p/4) && i !== Math.round(3*p/4))
 								this.remove();
 						});
 
 					tip.html(function(d, e) {
-						var s = that.timeago(+d.x/1000)
+						var s = d.timeago;
 						for (var i=0; i<layeredData.length; i++) {
 							s += '<br/>' + '<span class="value">' + format(layeredData[i].values[e].y);
 							s += '<span class="key" style="background-color:' + layeredData[i].colour + ';">';
@@ -278,8 +288,9 @@ var Dash = {
 		var that = this;
 		var format = d3.format('.4s');
 
-		var period = 60*60*1000;
-		var points = 25;
+		var time = this.generate_times(widget.config.time);
+		var period = time.period;
+		var points = time.points;
 		var colours = [
 			'#FF9F29',
 			'#FF742E',
@@ -300,7 +311,7 @@ var Dash = {
 			.scale(x)
 			.tickSize(0, 0, 0)
 			.tickPadding(12)
-			.tickFormat(function(d) { return that.timeago(d/1000); })
+			.tickFormat(function(d) { return that.timeago(d); })
 			.orient('bottom');
 
 		var yAxis = d3.svg.axis()
@@ -388,18 +399,19 @@ var Dash = {
 					// remove most of the ticks
 					svg.selectAll('.x.axis > .tick')
 						.each(function(d, i) {
+							var p = points-1;
 							if (width < 200) {
-								if (i !== 0 && i !== points-1)
+								if (i !== 0 && i !== p-1)
 									this.remove();
 								return;
 							}
 
-							if (i % Math.floor(points/4) !== 0)
+							if (i !== 0 && i !== p && i !== Math.round(p/2) && i !== Math.round(p/4) && i !== Math.round(3*p/4))
 								this.remove();
 						});
 
 					tip.html(function(d, e) {
-						var s = that.timeago(+d.x/1000)
+						var s = d.timeago;
 						for (var i=0; i<layeredData.length; i++) {
 							s += '<br/>' + '<span class="value">' + format(layeredData[i].values[e].y);
 							s += '<span class="key" style="background-color:' + layeredData[i].colour + ';">';
@@ -562,27 +574,25 @@ var Dash = {
 		this.id('dash').appendChild(w.firstChild);
 	},
 
-	timeago: function(time) {
+	timeago: function(time, specific) {
 		var
-		local = new Date().getTime()/1000,
+		local = new Date().getTime(),
 		offset = Math.abs((local - time)),
 		span   = [],
-		MINUTE = 60,
-		HOUR   = 3600,
-		DAY    = 86400,
-		WEEK   = 604800,
-		MONTH  = 2629744,
-		YEAR   = 31556926;
-		DECADE = 315569260;
+		SECOND = 1000
+		MINUTE = 60000,
+		HOUR   = 3600000,
+		DAY    = 86400000,
+		WEEK   = 604800000;
 
-		if (offset <= MINUTE)              span = [ '', 'now' ];
+		if (offset <= SECOND)              span = [ '', 'now' ];
+		else if (offset < (SECOND * 60))   span = [ Math.round(Math.abs(offset / SECOND)), 'second'];
 		else if (offset < (MINUTE * 60))   span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ];
 		else if (offset < (HOUR * 24))     span = [ Math.round(Math.abs(offset / HOUR)), 'hr' ];
 		else if (offset < (DAY * 7))       span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
-		else if (offset < (WEEK * 52))     span = [ Math.round(Math.abs(offset / WEEK)), 'week' ];
-		else if (offset < (YEAR * 10))     span = [ Math.round(Math.abs(offset / YEAR)), 'year' ];
-		else if (offset < (DECADE * 100))  span = [ Math.round(Math.abs(offset / DECADE)), 'decade' ];
+		else if (offset < (DAY * 31))      span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
 		else                               span = [ '', 'a long time' ];
+
 
 		span[1] += (span[0] === 0 || span[0] > 1) ? 's' : '';
 		span = span.join(' ');
