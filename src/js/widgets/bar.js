@@ -178,7 +178,7 @@ Dash.generate_bar = function(widget) {
 				});
 				legend.layers = layeredData;
 
-				that.generate_legend(node, legend);
+				that.generate_legend(node, legend, 'row');
 			}
 		});
 	}

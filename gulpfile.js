@@ -102,12 +102,14 @@ gulp.task('minify', ['min_js', 'min_css']);
 gulp.task('watch', function() {
 	livereload.listen();
 
-	gulp.watch('src/js/**/*.js', ['min_js']).on('change', function(f) {
-		livereload().changed(f.path);
-	});
+	gulp.watch('src/js/**/*.js', ['min_js']);
 
 	gulp.watch('src/css/**/*', ['stylus']);
 	gulp.watch('src/views/**/*', ['dot']);
+
+	gulp.watch('dist/assets/dash.js').on('change', function(f) {
+		livereload().changed(f.path);
+	});
 
 	gulp.watch('dist/assets/css/*').on('change', function(f) {
 		livereload().changed(f.path);

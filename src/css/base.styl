@@ -33,21 +33,32 @@ body
 		position absolute
 
 	.legend
-		float right
 		margin-top 5px
 
-		li
-			display inline-block
-			margin-left 0
-			white-space nowrap
+		&.row
+			float right
 
-			&:first-child
-				span
-					position relative
-					bottom -1px
-					font-weight 700
-					font-size 16px
+			li
+				display inline-block
+				margin-left 0
+				white-space nowrap
 
+				&:first-child
+					span
+						position relative
+						bottom -1px
+						font-weight 700
+						font-size 16px
+
+		&.col
+			position absolute
+			left 50%
+			top 50%
+			transform translate(0, -50%)
+
+			ul
+				text-align right
+				white-space nowrap
 
 		.total, .title
 			color darken(#A5A5A5, 10)

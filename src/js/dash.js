@@ -96,13 +96,6 @@ var Dash = {
 		return stack;
 	},
 
-	generate_legend: function(parent, data) {
-		parent.select('.legend').remove();
-
-		parent.append('div').attr('class', 'legend cf')
-			.html(Templates.legend_totals(data));
-	},
-
 	init_dash: function() {
 		this.render_dash();
 
@@ -121,7 +114,7 @@ var Dash = {
 
 		this.render_widget(w);
 
-		if (['line','bar'].indexOf(w.type) === -1) return;
+		if (['line','bar', 'pie'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
 		console.log('widget', w)
