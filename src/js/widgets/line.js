@@ -74,7 +74,7 @@ Dash.generate_line = function(widget) {
 				var sources = [];
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'tsdb') {
+						if (ok.data[i].id === widget.sources[j].id) {
 							ok.data[i].name = widget.sources[j].name;
 							if ( ! ok.data[i].data) ok.data[i].data = {};
 							sources.push(ok.data[i]);

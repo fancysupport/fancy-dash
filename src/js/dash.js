@@ -14,6 +14,15 @@ var Dash = {
 		Chart.defaults.global.showTooltips = false;
 		Chart.defaults.global.rotateXLabels = false;
 
+		// TODO fix dot compiler to remove this needing to be on the prototype
+		String.prototype.encodeHTML = function() {
+			var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;' },
+			matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
+			return function() {
+				return this ? this.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : this;
+			};
+		}();
+
 		this.hash_changed();
 
 		// set up the hash change callback
@@ -114,7 +123,7 @@ var Dash = {
 
 		this.render_widget(w);
 
-		if (['line','bar', 'pie'].indexOf(w.type) === -1) return;
+		if (['line','bar', 'pie', 'text'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
 		console.log('widget', w)

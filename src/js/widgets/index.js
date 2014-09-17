@@ -1,4 +1,5 @@
+import "legends";
 import "bar";
 import "line";
 import "pie";
-import "legends";
+import "text";
