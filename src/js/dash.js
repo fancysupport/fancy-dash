@@ -61,7 +61,7 @@ var Dash = {
 			day: {points:25, period: 1000*60*60},
 			week: {points:9, period: 1000*60*60*24},
 			month: {points:31, period: 1000*60*60*24}
-		}
+		};
 
 		return times[interval];
 	},
@@ -92,16 +92,20 @@ var Dash = {
 	generate_layered_series: function(sources, points, period) {
 		var that = this;
 		var stack = [];
+
+		var cb = function(e) {
+			return {x: e.key, y: e.value, timeago: that.timeago(+e.key)};
+		};
+
 		for (var i=0; i<sources.length; i++) {
 			stack[i] = {
 				id: sources[i].id,
 				name: sources[i].name,
-				values: this.generate_timeseries(sources[i].data, points, period).map(function(e) {
-					return {x: e.key, y: e.value, timeago: that.timeago(+e.key)};
-				})
-			}
+				values: this.generate_timeseries(sources[i].data, points, period).map(cb)};
 		}
-		stack.sort(function(a,b){return a.id>b.id})
+
+		stack.sort(function(a,b){return a.id>b.id;});
+
 		return stack;
 	},
 
@@ -126,7 +130,7 @@ var Dash = {
 		if (['line','bar', 'pie', 'text'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
-		console.log('widget', w)
+		console.log('widget', w);
 	},
 
 	get_dash: function(token) {
@@ -211,7 +215,7 @@ var Dash = {
 		local = new Date().getTime(),
 		offset = Math.abs((local - time)),
 		span   = [],
-		SECOND = 1000
+		SECOND = 1000,
 		MINUTE = 60000,
 		HOUR   = 3600000,
 		DAY    = 86400000,

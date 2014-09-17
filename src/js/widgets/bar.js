@@ -39,7 +39,7 @@ Dash.generate_bar = function(widget) {
 			return p.scale(d) + p.symbol;
 		});
 
-	var node = d3.select('[data-id="' + widget.id + '"]')
+	var node = d3.select('[data-id="' + widget.id + '"]');
 	var svg = node.append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
@@ -55,7 +55,7 @@ Dash.generate_bar = function(widget) {
 		.attr('transform', 'translate(0,' + height + ')');
 
 	svg.append('g')
-		.attr('class', 'y axis')
+		.attr('class', 'y axis');
 
 	var tip = d3.tip()
 		.attr('class', 'd3-tip');
@@ -80,7 +80,7 @@ Dash.generate_bar = function(widget) {
 				if (sources.length === 0) return;
 
 				var data = that.generate_layered_series(sources, points, period);
-				for (var i=0; i<data.length; i++) {
+				for (i=0; i<data.length; i++) {
 					data[i].colour = colours[i];
 				}
 				var layeredData = stack(data);
@@ -156,8 +156,8 @@ Dash.generate_bar = function(widget) {
 				rect.exit().remove();
 
 				rect.enter().append('rect')
-					.attr('x', function(d) { return x(d.x) - bar_width/2 })
-					.attr('height', function(d) { return Math.abs(y(d.y0) - y(d.y0 + d.y)) })
+					.attr('x', function(d) { return x(d.x) - bar_width/2; })
+					.attr('height', function(d) { return Math.abs(y(d.y0) - y(d.y0 + d.y)); })
 					.attr('width', bar_width)
 					.attr('y', function(d) { return y(Math.max(d.y0, (d.y0 + d.y))); })
 					.on('mouseover', tip.show)

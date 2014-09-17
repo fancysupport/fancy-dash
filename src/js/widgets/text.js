@@ -33,7 +33,7 @@ Dash.generate_text = function(widget) {
 
 				if (sources.length === 0) return;
 
-				for (var i=0; i<sources.length; i++) {
+				for (i=0; i<sources.length; i++) {
 					node.append('p').html(Templates.text({
 						data: sources[i].data,
 						colour: colours[i]

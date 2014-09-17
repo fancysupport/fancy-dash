@@ -75,7 +75,7 @@ Dash.generate_pie = function(widget) {
 					})
 					.on('mouseout', tip.hide);
 
-				for (var i=0; i<sources.length; i++) {
+				for (i=0; i<sources.length; i++) {
 					sources[i].total = sources[i].data;
 					sources[i].colour = colours[i];
 				}

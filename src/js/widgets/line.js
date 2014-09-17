@@ -39,7 +39,7 @@ Dash.generate_line = function(widget) {
 			return p.scale(d) + p.symbol;
 		});
 
-	var node = d3.select('[data-id="' + widget.id + '"]')
+	var node = d3.select('[data-id="' + widget.id + '"]');
 	var svg = node.append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
@@ -60,7 +60,7 @@ Dash.generate_line = function(widget) {
 		.attr('transform', 'translate(0,' + height + ')');
 
 	svg.append('g')
-		.attr('class', 'y axis')
+		.attr('class', 'y axis');
 
 	var tip = d3.tip()
 		.attr('class', 'd3-tip');
@@ -85,7 +85,7 @@ Dash.generate_line = function(widget) {
 				if (sources.length === 0) return;
 
 				var data = that.generate_layered_series(sources, points, period);
-				for (var i=0; i<data.length; i++) {
+				for (i=0; i<data.length; i++) {
 					data[i].colour = colours[i];
 				}
 				var layeredData = stack(data);
