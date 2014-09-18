@@ -14,8 +14,6 @@ Dash.generate_image = function(widget) {
 		.style('width', widget.size[0]*200-20-30 + 'px')
 		.node();
 
-	console.log(image);
-
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
@@ -33,8 +31,6 @@ Dash.generate_image = function(widget) {
 				}
 
 				node.selectAll('img').remove();
-
-				console.log(sources);
 
 				if (sources.length === 0) return;
 

@@ -7,6 +7,15 @@ var Dash = {
 	widgets: {},
 	app: null,
 
+	times: {
+		SECOND: 1e3,
+		MINUTE: 6e4,
+		HOUR: 3.6e6,
+		DAY: 8.64e7,
+		WEEK: 6.048e8,
+		YEAR: 3.1536e10
+	},
+
 	init: function() {
 		// cache
 		this.app = this.id('app');
@@ -135,8 +144,6 @@ var Dash = {
 
 		this.render_widget(w);
 
-		if (['line','bar', 'pie', 'text', 'image'].indexOf(w.type) === -1) return;
-
 		this['generate_'+w.type](w);
 		console.log('widget', w);
 	},
@@ -218,26 +225,22 @@ var Dash = {
 		var
 		local = new Date().getTime(),
 		offset = Math.abs((local - time)),
-		span   = [],
-		SECOND = 1000,
-		MINUTE = 60000,
-		HOUR   = 3600000,
-		DAY    = 86400000,
-		WEEK   = 604800000;
+		span = [],
+		t = this.times;
 
-		if (offset <= SECOND)              span = [ '', 'now' ];
-		else if (offset < (SECOND * 60))   span = [ Math.round(Math.abs(offset / SECOND)), 'second'];
-		else if (offset < (MINUTE * 60))   span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ];
-		else if (offset < (HOUR * 24))     span = [ Math.round(Math.abs(offset / HOUR)), 'hr' ];
-		else if (offset < (DAY * 7))       span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
-		else if (offset < (DAY * 31))      span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
+		if (offset <= t.SECOND)              span = [ '', 'now' ];
+		else if (offset < (t.SECOND * 60))   span = [ Math.round(Math.abs(offset / t.SECOND)), 'second'];
+		else if (offset < (t.MINUTE * 60))   span = [ Math.round(Math.abs(offset / t.MINUTE)), 'min' ];
+		else if (offset < (t.HOUR * 24))     span = [ Math.round(Math.abs(offset / t.HOUR)), 'hr' ];
+		else if (offset < (t.DAY * 7))       span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
+		else if (offset < (t.DAY * 31))      span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
 		else                               span = [ '', 'a long time' ];
 
 
 		span[1] += (span[0] === 0 || span[0] > 1) ? 's' : '';
 		span = span.join(' ');
 
-		if (span === ' now') return span;
+		if (span === ' now') return 'now';
 
 		return (time <= local)  ? span + ' ago' : 'in ' + span;
 	}

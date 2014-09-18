@@ -121,7 +121,7 @@ Dash.generate_bar = function(widget) {
 						}
 
 						if (i !== 0 && i !== p && i !== Math.round(p/2) && i !== Math.round(p/4) && i !== Math.round(3*p/4))
-							this.remove();
+							d3.select(this).remove();
 					});
 
 				tip.html(function(d, e) {
