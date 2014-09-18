@@ -14,7 +14,7 @@ Dash.generate_pie = function(widget) {
 	var offset_x = width/2 - (width > 200 && width >= height ? width/4 : 0);
 	var offset_y = height/2 - (height > width ? height/4 : 0);
 
-	var node = d3.select('[data-id="' + widget.id + '"]')
+	var node = d3.select('[data-id="' + widget.id + '"]');
 	var svg = node.append('svg')
 			.attr('width', width)
 			.attr('height', height)

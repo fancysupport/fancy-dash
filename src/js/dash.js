@@ -54,6 +54,14 @@ var Dash = {
 		return document.querySelector(q);
 	},
 
+	make_node: function(s) {
+		// unsure how to just append a string to DOM
+		// so take the DOM from an element and append that
+		var n = document.createElement('div');
+		n.innerHTML = s;
+		return n.firstChild;
+	},
+
 	generate_times: function(interval) {
 		var times = {
 			minute: {points: 61, period: 1000},
@@ -127,7 +135,7 @@ var Dash = {
 
 		this.render_widget(w);
 
-		if (['line','bar', 'pie', 'text'].indexOf(w.type) === -1) return;
+		if (['line','bar', 'pie', 'text', 'image'].indexOf(w.type) === -1) return;
 
 		this['generate_'+w.type](w);
 		console.log('widget', w);
@@ -203,11 +211,7 @@ var Dash = {
 	},
 
 	render_widget: function(widget) {
-		// unsure how to just append a string to DOM
-		// so take the DOM from an element and append that
-		var w = document.createElement('div');
-		w.innerHTML = Templates.widget(widget);
-		this.id('dash').appendChild(w.firstChild);
+		this.id('dash').appendChild(this.make_node(Templates.widget(widget)));
 	},
 
 	timeago: function(time) {
