@@ -52,7 +52,7 @@ Dash.generate_pie = function(widget) {
 				if (sources.length === 0) return;
 
 				tip.html(function(d, e) {
-					return '<span class="value">' + d.data.name + ': ' + format(d.value) + '<span class="key" style="background-color:' + colours[e] + ';"></span></span>';
+					return '<span class="value">' + d.data.name + ': ' + format(d.value) + '<span class="key" style="background-color:' + sources[e].colour + ';"></span></span>';
 				});
 
 				var a = svg.selectAll('.arc')
