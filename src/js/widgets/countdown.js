@@ -2,12 +2,6 @@ Dash.generate_countdown = function(widget) {
 	var that = this;
 	var interval;
 
-	var colours = [
-		'#FF9F29',
-		'#FF742E',
-		'#F55332'
-	];
-
 	var t = this.times;
 
 	var node = d3.select('[data-id="' + widget.id + '"]');
@@ -54,6 +48,7 @@ Dash.generate_countdown = function(widget) {
 						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
 							var key = Object.keys(ok.data[i].data)[0];
 							ok.data[i].data = ok.data[i].data[key];
+							ok.data[i].colour = widget.sources[j].config.colour;
 
 							sources.push(ok.data[i]);
 						}
@@ -69,7 +64,7 @@ Dash.generate_countdown = function(widget) {
 					// if they want multiple, make multiple
 					count.html(Templates.countdown({
 						data: difference(sources[0].data),
-						colour: colours[0],
+						colour: sources[0].colour,
 						size: widget.size
 					}));
 				};

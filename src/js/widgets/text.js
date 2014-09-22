@@ -1,12 +1,6 @@
 Dash.generate_text = function(widget) {
 	var that = this;
 
-	var colours = [
-		'#FF9F29',
-		'#FF742E',
-		'#F55332'
-	];
-
 	var node = d3.select('[data-id="' + widget.id + '"]').append('div');
 	var text = node.attr('class', 'text')
 		.style('height', widget.size[1]*200-20-30 + 'px') // x*cell - w_margin - text_margin
@@ -23,6 +17,7 @@ Dash.generate_text = function(widget) {
 						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
 							var key = Object.keys(ok.data[i].data)[0];
 							ok.data[i].data = ok.data[i].data[key];
+							ok.data[i].colour = widget.sources[j].config.colour;
 
 							sources.push(ok.data[i]);
 						}
@@ -36,7 +31,7 @@ Dash.generate_text = function(widget) {
 				for (i=0; i<sources.length; i++) {
 					text.appendChild(that.make_node(Templates.text({
 						data: sources[i].data,
-						colour: colours[i]
+						colour: sources[i].colour
 					})));
 				}
 			}

@@ -5,11 +5,6 @@ Dash.generate_bar = function(widget) {
 	var time = this.generate_times(widget.config.time);
 	var period = time.period;
 	var points = time.points;
-	var colours = [
-		'#FF9F29',
-		'#FF742E',
-		'#F55332'
-	];
 
 	var margin = {top: 30, right: 10, bottom: 35, left: 43};
 	var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
@@ -71,7 +66,9 @@ Dash.generate_bar = function(widget) {
 					for (var j=0; j<widget.sources.length; j++) {
 						if (ok.data[i].id === widget.sources[j].id) {
 							ok.data[i].name = widget.sources[j].name;
+							ok.data[i].colour = widget.sources[j].config.colour;
 							if ( ! ok.data[i].data) ok.data[i].data = {};
+
 							sources.push(ok.data[i]);
 						}
 					}
@@ -80,9 +77,6 @@ Dash.generate_bar = function(widget) {
 				if (sources.length === 0) return;
 
 				var data = that.generate_layered_series(sources, points, period);
-				for (i=0; i<data.length; i++) {
-					data[i].colour = colours[i];
-				}
 				var layeredData = stack(data);
 
 				// an extra period at either end for padding?

@@ -2,12 +2,6 @@ Dash.generate_pie = function(widget) {
 	var that = this;
 	var format = d3.format('.4s');
 
-	var colours = [
-		'#FF9F29',
-		'#FF742E',
-		'#F55332'
-	];
-
 	var width = widget.size[0] * 200 - 20;
 	var height = widget.size[1] * 200 - 20;
 
@@ -45,6 +39,7 @@ Dash.generate_pie = function(widget) {
 					for (var j=0; j<widget.sources.length; j++) {
 						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
 							ok.data[i].name = widget.sources[j].name;
+							ok.data[i].colour = widget.sources[j].config.colour;
 
 							var key = Object.keys(ok.data[i].data)[0];
 							ok.data[i].data = parseFloat(ok.data[i].data[key]) || 0;
@@ -68,20 +63,21 @@ Dash.generate_pie = function(widget) {
 				a.append('path')
 					.attr('d', arc)
 					.style('fill', function(d, i) {
-						return colours[i];
+						return sources[i].colour;
 					})
 					.on('mouseover', function(d, e, i) {
 						tip.show.call(this, d, e, i, d3.event);
 					})
 					.on('mouseout', tip.hide);
 
-				for (i=0; i<sources.length; i++) {
-					sources[i].total = sources[i].data;
-					sources[i].colour = colours[i];
-				}
+					if (width > 200 || height > 200) {
+						for (i=0; i<sources.length; i++) {
+							sources[i].total = sources[i].data;
+							sources[i].colour = sources[i].colour;
+						}
 
-				if (width > 200 || height > 200)
-					that.generate_legend(node, sources, 'col', {w:width, h:height});
+						that.generate_legend(node, sources, 'col', {w:width, h:height});
+					}
 			}
 		});
 	}

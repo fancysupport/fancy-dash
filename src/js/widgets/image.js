@@ -36,8 +36,7 @@ Dash.generate_image = function(widget) {
 
 				for (i=0; i<sources.length; i++) {
 					image.appendChild(that.make_node(Templates.image({
-						data: sources[i].data,
-						colour: colours[i]
+						data: sources[i].data
 					})));
 				}
 			}

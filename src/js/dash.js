@@ -118,6 +118,7 @@ var Dash = {
 			stack[i] = {
 				id: sources[i].id,
 				name: sources[i].name,
+				colour: sources[i].colour,
 				values: this.generate_timeseries(sources[i].data, points, period).map(cb)};
 		}
 
