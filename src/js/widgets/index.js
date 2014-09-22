@@ -5,3 +5,4 @@ import "pie";
 import "text";
 import "image";
 import "countdown";
+import "counter";

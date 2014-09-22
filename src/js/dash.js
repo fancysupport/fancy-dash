@@ -145,8 +145,8 @@ var Dash = {
 
 		this.render_widget(w);
 
-		this['generate_'+w.type](w);
 		console.log('widget', w);
+		this['generate_'+w.type](w);
 	},
 
 	get_dash: function(token) {
