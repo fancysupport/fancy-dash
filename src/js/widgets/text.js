@@ -29,10 +29,12 @@ Dash.generate_text = function(widget) {
 				if (sources.length === 0) return;
 
 				for (i=0; i<sources.length; i++) {
-					text.appendChild(that.make_node(Templates.text({
+					var t = text.appendChild(that.make_node(Templates.text({
 						data: sources[i].data,
 						colour: sources[i].colour
 					})));
+					// add line breaks
+					t.innerHTML = t.innerHTML.replace(/(?:\r\n|\r|\n)/g, '<br/>');
 				}
 			}
 		});
