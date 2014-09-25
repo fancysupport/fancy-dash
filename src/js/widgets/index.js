@@ -6,3 +6,4 @@ import "text";
 import "image";
 import "countdown";
 import "counter";
+import "gauge";

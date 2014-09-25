@@ -23,8 +23,6 @@ Dash.generate_counter = function(widget) {
 					}
 				}
 
-				node.selectAll('span').remove();
-
 				if (sources.length === 0) return;
 
 				counter.html(Templates.counter({
