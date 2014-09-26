@@ -67,14 +67,16 @@ Dash.generate_gauge = function(widget) {
 
 				gauge.append('text')
 					.attr('text-anchor', 'middle')
-					.style('font-size', font_size)
+					.style('font-size', font_size+'px')
 					.style('font-weight', 'bold')
+					.style('fill', sources[0].colour)
 					.attr('dy', -font_size*0.4+'px')
 					.text(format(current_value));
 
 				gauge.append('text')
+					.attr('class', 'max')
 					.attr('text-anchor', 'middle')
-					.style('font-size', font_size*0.75)
+					.style('font-size', font_size*0.75+'px')
 					.attr('dy', font_size+'px')
 					.text(format(max_value));
 			}

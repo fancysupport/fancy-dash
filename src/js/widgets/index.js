@@ -7,3 +7,4 @@ import "image";
 import "countdown";
 import "counter";
 import "gauge";
+import "smiley";
