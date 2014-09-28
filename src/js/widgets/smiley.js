@@ -18,8 +18,8 @@ Dash.generate_thumbs = function(widget) {
 
 	function check(s) {
 		switch (s.toLowerCase()) {
-			case 'false': case 'no': case '0': case 'null': case '': return false;
-			default: return true;
+			case '1': return true;
+			default: return false;
 		}
 	}
 
