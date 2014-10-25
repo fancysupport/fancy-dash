@@ -42,29 +42,14 @@ Dash.generate_countdown = function(widget) {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
 				console.log('new data countdown', ok.data);
-				var sources = [];
-				for (var i=0; i<ok.data.length; i++) {
-					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
-							var key = Object.keys(ok.data[i].data)[0];
-							ok.data[i].data = ok.data[i].data[key];
-							ok.data[i].colour = widget.sources[j].config.colour;
-
-							sources.push(ok.data[i]);
-						}
-					}
-				}
 
 				clearInterval(interval);
 
-				if (sources.length === 0) return;
-
 				var update = function() {
-					// just going to make it the first source
-					// if they want multiple, make multiple
+					// only do one source
 					count.html(Templates.countdown({
-						data: difference(sources[0].data),
-						colour: sources[0].colour,
+						data: difference(parseFloat(ok.data[0].data[0].results[0].values[0][1]) || 0),
+						colour: widget.sources[0].config.colour,
 						size: widget.size
 					}));
 				};
