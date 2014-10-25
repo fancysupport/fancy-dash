@@ -176,9 +176,14 @@ var Dash = {
 	},
 
 	get_widget_data: function(w, cb) {
+		var url = '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data';
+
+		if (w.config && (w.config.time || w.config.agg))
+			url += '?time=' + w.config.time + '&agg=' + w.config.agg;
+
 		this.ajax({
 			method: 'GET',
-			url: '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data?time=' + w.config.time + '&agg=' + w.config.agg
+			url: url
 		}, cb);
 	},
 
