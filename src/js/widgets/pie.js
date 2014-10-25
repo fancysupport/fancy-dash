@@ -35,16 +35,15 @@ Dash.generate_pie = function(widget) {
 			if (ok && ok.data) {
 				console.log('new data pie', ok.data);
 				var sources = [];
+
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
-							ok.data[i].name = widget.sources[j].name;
-							ok.data[i].colour = widget.sources[j].config.colour;
-
-							var key = Object.keys(ok.data[i].data)[0];
-							ok.data[i].data = parseFloat(ok.data[i].data[key]) || 0;
-
-							sources.push(ok.data[i]);
+						if (ok.data[i].id === widget.sources[j].id) {
+							sources.push({
+								data: parseFloat(ok.data[i].data[0].results[0].values[0][1]) || 0,
+								colour: widget.sources[j].config.colour,
+								name: ok.data[i].data[0].results[0].name
+							});
 						}
 					}
 				}
