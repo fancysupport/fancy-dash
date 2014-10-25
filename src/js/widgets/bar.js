@@ -62,14 +62,16 @@ Dash.generate_bar = function(widget) {
 			if (ok && ok.data) {
 				console.log('new data bar', ok.data);
 				var sources = [];
+
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
 						if (ok.data[i].id === widget.sources[j].id) {
-							ok.data[i].name = widget.sources[j].name;
-							ok.data[i].colour = widget.sources[j].config.colour;
-							if ( ! ok.data[i].data) ok.data[i].data = {};
 
-							sources.push(ok.data[i]);
+							sources.push({
+								data: ok.data[i].data[0].results[0].values,
+								colour: widget.sources[j].config.colour,
+								name: widget.sources[j].name
+							});
 						}
 					}
 				}
