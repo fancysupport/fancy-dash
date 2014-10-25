@@ -55,29 +55,30 @@ Dash.generate_pie = function(widget) {
 					return '<span class="value">' + d.data.name + ': ' + format(d.value) + '<span class="key" style="background-color:' + sources[e].colour + ';"></span></span>';
 				});
 
-				var a = svg.selectAll('.arc')
-					.data(pie(sources))
-				.enter().append('g')
-					.attr('class', 'arc');
+				if (sources.filter(function(d) { return d.data > 0; }).length > 0) {
+					var a = svg.selectAll('.arc')
+						.data(pie(sources))
+					.enter().append('g')
+						.attr('class', 'arc');
 
-				a.append('path')
-					.attr('d', arc)
-					.style('fill', function(d, i) {
-						return sources[i].colour;
-					})
-					.on('mouseover', function(d, e, i) {
-						tip.show.call(this, d, e, i, d3.event);
-					})
-					.on('mouseout', tip.hide);
+					a.append('path')
+						.attr('d', arc)
+						.style('fill', function(d, i) {
+							return sources[i].colour;
+						})
+						.on('mouseover', function(d, e, i) {
+							tip.show.call(this, d, e, i, d3.event);
+						})
+						.on('mouseout', tip.hide);
+				}
 
-					if (width > 200 || height > 200) {
-						for (i=0; i<sources.length; i++) {
-							sources[i].total = sources[i].data;
-							sources[i].colour = sources[i].colour;
-						}
-
-						that.generate_legend(node, sources, 'col', {w:width, h:height});
+				if (width > 200 || height > 200) {
+					for (i=0; i<sources.length; i++) {
+						sources[i].total = sources[i].data;
 					}
+
+					that.generate_legend(node, sources, 'col', {w:width, h:height});
+				}
 			}
 		});
 	}

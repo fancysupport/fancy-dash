@@ -33,8 +33,6 @@ Dash.generate_text = function(widget) {
 						data: sources[i].data,
 						colour: sources[i].colour
 					})));
-					// add line breaks
-					t.innerHTML = t.innerHTML.replace(/(?:\r\n|\r|\n)/g, '<br/>');
 				}
 			}
 		});

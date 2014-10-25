@@ -20,9 +20,6 @@ var Dash = {
 		// cache
 		this.app = this.id('app');
 
-		Chart.defaults.global.showTooltips = false;
-		Chart.defaults.global.rotateXLabels = false;
-
 		// TODO fix dot compiler to remove this needing to be on the prototype
 		String.prototype.encodeHTML = function() {
 			var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;' },

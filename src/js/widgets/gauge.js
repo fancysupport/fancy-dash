@@ -35,7 +35,7 @@ Dash.generate_gauge = function(widget) {
 					for (var j=0; j<widget.sources.length; j++) {
 						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
 							var key = Object.keys(ok.data[i].data)[0];
-							ok.data[i].data = ok.data[i].data[key];
+							ok.data[i].data = parseFloat(ok.data[i].data[key]) || 0;
 							ok.data[i].colour = widget.sources[j].config.colour;
 							ok.data[i].name = widget.sources[j].name;
 
