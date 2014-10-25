@@ -180,5 +180,6 @@ Dash.generate_bar = function(widget) {
 	}
 
 	draw();
-	setInterval(draw, 60*1000);
+	this.intervals[widget.id] = this.intervals[widget.id] || [];
+	this.intervals[widget.id].push(setInterval(draw, 60*1000));
 };

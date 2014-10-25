@@ -1,7 +1,5 @@
 Dash.generate_countdown = function(widget) {
 	var that = this;
-	var interval;
-
 	var t = this.times;
 
 	var node = d3.select('[data-id="' + widget.id + '"]');
@@ -43,7 +41,8 @@ Dash.generate_countdown = function(widget) {
 			if (ok && ok.data) {
 				console.log('new data countdown', ok.data);
 
-				clearInterval(interval);
+				if (that.intervals[widget.id].length === 2)
+					clearInterval(that.intervals[widget.id][1]);
 
 				var update = function() {
 					// only do one source
@@ -55,11 +54,12 @@ Dash.generate_countdown = function(widget) {
 				};
 
 				update();
-				interval = setInterval(update, 1000);
+				that.intervals[widget.id].push(setInterval(update, 1000));
 			}
 		});
 	}
 
 	draw();
-	setInterval(draw, 60*1000);
+	this.intervals[widget.id] = this.intervals[widget.id] || [];
+	this.intervals[widget.id].push(setInterval(draw, 60*1000));
 };

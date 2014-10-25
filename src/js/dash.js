@@ -7,6 +7,8 @@ var Dash = {
 	widgets: {},
 	app: null,
 
+	intervals: {},
+
 	times: {
 		SECOND: 1e3,
 		MINUTE: 6e4,
@@ -38,6 +40,12 @@ var Dash = {
 	hash_changed: function() {
 		var token = window.location.hash.slice(1);
 		console.log('new hash:', token);
+
+		for (var id in this.intervals) {
+			for (var i=0; i<id.length; i++) {
+				clearInterval(id[i]);
+			}
+		}
 
 		if (token) this.get_dash(token);
 		else this.render_empty();
