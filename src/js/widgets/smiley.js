@@ -27,33 +27,24 @@ Dash.generate_thumbs = function(widget) {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
 				console.log('new data thumbs', ok.data);
-				var sources = [];
-				for (var i=0; i<ok.data.length; i++) {
-					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
-							var key = Object.keys(ok.data[i].data)[0];
-							ok.data[i].data = ok.data[i].data[key];
-							ok.data[i].colour = widget.sources[j].config.colour;
-							ok.data[i].name = widget.sources[j].name;
 
-							sources.push(ok.data[i]);
-						}
-					}
-				}
+				var source = {
+					data: ok.data[0].data[0].results[0].values[0][1],
+					colour: widget.sources[0].config.colour,
+					name: ok.data[0].data[0].results[0].name,
+				};
 
 				node.selectAll('.smiley').remove();
 				node.selectAll('text').remove();
 
-				if (sources.length === 0) return;
-
-				var icon = check(sources[0].data) ? happy_smiley : sad_smiley;
+				var icon = check(source.data) ? happy_smiley : sad_smiley;
 
 				var smiley = svg.append('g')
 					.attr('transform', 'translate(-62,0)')
 					.attr('class', 'smiley');
 
 				smiley.append('path')
-					.style('fill', sources[0].colour)
+					.style('fill', source.colour)
 					.attr('d', icon);
 
 				var font_size = scale * 24;
@@ -63,8 +54,8 @@ Dash.generate_thumbs = function(widget) {
 					.attr('text-anchor', 'middle')
 					.style('font-size', font_size+'px')
 					.attr('dy', 150+'px')
-					.style('fill', sources[0].colour)
-					.text(sources[0].name);
+					.style('fill', source.colour)
+					.text(source.name);
 			}
 		});
 	}
