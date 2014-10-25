@@ -81,24 +81,27 @@ var Dash = {
 	},
 
 	generate_timeseries: function(data, points, period) {
-		var end = {};
+		var end = [];
 		var now = new Date().getTime();
 
 		for (var i=0; i<points; i++) {
-			end[now-i*period] = 0;
+			end.push([now-i*period, 0]);
 		}
 
-		for (var orig in data) {
-			for (var time in end) {
-				if (Math.abs(orig*1000-time) < period) {
-					end[time] = data[orig];
+		for (i=0; i<data.length; i++) {
+			var orig = data[i];
+
+			for (var j=0; j<end.length; j++) {
+				var time = end[j];
+
+				if (Math.abs(orig[0]-time[0]) < period) {
+					time[1] = orig[1];
 					break;
 				}
 			}
 		}
 
-		end = this.entries(end);
-		end.sort(function(a,b){return a.key-b.key;});
+		end.sort(function(a,b){return a[0]-b[0];});
 
 		return end;
 	},
@@ -108,12 +111,11 @@ var Dash = {
 		var stack = [];
 
 		var cb = function(e) {
-			return {x: e.key, y: e.value, timeago: that.timeago(+e.key)};
+			return {x: e[0], y: e[1], timeago: that.timeago(+e[0])};
 		};
 
 		for (var i=0; i<sources.length; i++) {
 			stack[i] = {
-				id: sources[i].id,
 				name: sources[i].name,
 				colour: sources[i].colour,
 				values: this.generate_timeseries(sources[i].data, points, period).map(cb)};
@@ -168,7 +170,7 @@ var Dash = {
 	get_widget_data: function(w, cb) {
 		this.ajax({
 			method: 'GET',
-			url: '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data?t=' + w.config.time + '&a=' + w.config.agg
+			url: '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data?time=' + w.config.time + '&agg=' + w.config.agg
 		}, cb);
 	},
 
