@@ -12,14 +12,14 @@ Dash.generate_text = function(widget) {
 			if (ok && ok.data) {
 				console.log('new data text', ok.data);
 				var sources = [];
+
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id && widget.sources[j].source === 'internal') {
-							var key = Object.keys(ok.data[i].data)[0];
-							ok.data[i].data = ok.data[i].data[key];
-							ok.data[i].colour = widget.sources[j].config.colour;
-
-							sources.push(ok.data[i]);
+						if (ok.data[i].id === widget.sources[j].id) {
+							sources.push({
+								data: ok.data[i].data[0].results[0].values[0][1],
+								colour: widget.sources[j].config.colour
+							});
 						}
 					}
 				}
