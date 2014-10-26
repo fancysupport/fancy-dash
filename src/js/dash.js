@@ -153,7 +153,9 @@ var Dash = {
 		this.render_widget(w);
 
 		console.log('widget', w);
-		this['generate_'+w.type](w);
+
+		var type = w.type.replace(/:/g, '_');
+		this['generate_'+type](w);
 	},
 
 	get_dash: function(token) {

@@ -8,3 +8,4 @@ import "countdown";
 import "counter";
 import "gauge";
 import "smiley";
+import "fancy_customers_impressions";
