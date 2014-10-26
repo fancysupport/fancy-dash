@@ -1,12 +1,6 @@
 Dash.generate_image = function(widget) {
 	var that = this;
 
-	var colours = [
-		'#FF9F29',
-		'#FF742E',
-		'#F55332'
-	];
-
 	var node = d3.select('[data-id="' + widget.id + '"]');
 	var image = node.append('div')
 		.attr('class', 'image')
