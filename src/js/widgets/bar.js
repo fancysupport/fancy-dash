@@ -64,10 +64,10 @@ Dash.generate_bar = function(widget) {
 
 				for (var i=0; i<ok.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].id === widget.sources[j].id) {
+						if (ok.data[i].source_id === widget.sources[j].id) {
 
 							sources.push({
-								data: ok.data[i].data[0].results[0].values,
+								data: ok.data[i].values,
 								colour: widget.sources[j].config.colour,
 								name: widget.sources[j].name
 							});

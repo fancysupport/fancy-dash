@@ -29,9 +29,9 @@ Dash.generate_thumbs = function(widget) {
 				console.log('new data thumbs', ok.data);
 
 				var source = {
-					data: ok.data[0].data[0].results[0].values[0][1],
+					data: ok.data[0].values[0][1],
 					colour: widget.sources[0].config.colour,
-					name: ok.data[0].data[0].results[0].name,
+					name: widget.sources[0].name,
 				};
 
 				node.selectAll('.smiley').remove();

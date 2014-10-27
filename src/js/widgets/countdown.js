@@ -47,7 +47,7 @@ Dash.generate_countdown = function(widget) {
 				var update = function() {
 					// only do one source
 					count.html(Templates.countdown({
-						data: difference(parseFloat(ok.data[0].data[0].results[0].values[0][1]) || 0),
+						data: difference(parseFloat(ok.data[0].values[0][1]) || 0),
 						colour: widget.sources[0].config.colour,
 						size: widget.size
 					}));

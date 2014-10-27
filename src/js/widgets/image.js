@@ -15,14 +15,8 @@ Dash.generate_image = function(widget) {
 
 				node.selectAll('img').remove();
 
-				var url = '';
-
-				try {
-					url = ok.data[0].data[0].results[0].values[0][1];
-				} catch(e) {}
-
 				image.appendChild(that.make_node(Templates.image({
-					data: url
+					data: ok.data[0].values[0][1]
 				})));
 			}
 		});

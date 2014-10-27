@@ -11,9 +11,9 @@ Dash.generate_counter = function(widget) {
 
 				// only do one source
 				counter.html(Templates.counter({
-					amount: parseFloat(ok.data[0].data[0].results[0].values[0][1]) || 0,
+					amount: parseFloat(ok.data[0].values[0][1]) || 0,
 					colour: widget.sources[0].config.colour,
-					name: ok.data[0].data[0].results[0].name,
+					name: widget.sources[0].name,
 					size: widget.size
 				}));
 			}
