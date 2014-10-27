@@ -236,6 +236,30 @@ var Dash = {
 		this.id('dash').appendChild(this.make_node(Templates.widget(widget)));
 	},
 
+	format: function(n) {
+		if (n === 0) return 0;
+
+		if ((n < 0.01 && n > 0) || (n > -0.01 && n < 0)) {
+			 var parts = n.toExponential().split('e');
+			 parts[0] = Number(parts[0]).toPrecision(3);
+			 return parts[0] + 'e' + parts[1];
+		}
+
+		if (n >= 0.01 && n < 1) return Number(n.toPrecision(2));
+
+		var prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y" ];
+
+		var i = 1 + Math.floor(1e-12 + Math.log((n < 0 ? -n : n))/Math.LN10);
+		i = Math.max(-24, Math.min(24, Math.floor((i-1)/3)*3));
+		i /= 3;
+
+		var k = Math.pow(10, i*3);
+		n /= k;
+
+		// convert to number to get rid of padded 0s eg 1.000
+		return Number(n.toPrecision(4)) + prefixes[i];
+	},
+
 	timeago: function(time) {
 		var
 		local = new Date().getTime(),

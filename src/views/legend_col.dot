@@ -1,11 +1,9 @@
-{{ var f=d3.format('.4s'); }}
-
 <ul>
 	{{~ data :m }}
 		<li>
 			<span class="title">{{= m.name }}</span>
 			<span class="value">
-				{{= f(m.total) }}
+				{{= Dash.format(m.total) }}
 				<span class="key" style="background-color:{{= m.colour }}"></span>
 			</span>
 		</li>

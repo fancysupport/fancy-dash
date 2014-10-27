@@ -1,6 +1,6 @@
 Dash.generate_line = function(widget) {
 	var that = this;
-	var format = d3.format('.4s');
+	var format = this.format;
 
 	var time = this.generate_times(widget.config.time);
 	var period = time.period;
@@ -30,8 +30,7 @@ Dash.generate_line = function(widget) {
 		.tickSize(-width, -width, 0)
 		.tickPadding(8)
 		.tickFormat(function(d) {
-			var p = d3.formatPrefix(d);
-			return p.scale(d) + p.symbol;
+			return format(d);
 		});
 
 	var node = d3.select('[data-id="' + widget.id + '"]');

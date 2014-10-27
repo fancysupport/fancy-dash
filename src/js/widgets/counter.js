@@ -1,6 +1,5 @@
 Dash.generate_counter = function(widget) {
 	var that = this;
-	var format = d3.format('.4s');
 
 	var node = d3.select('[data-id="' + widget.id + '"]');
 	var counter = node.append('div').attr('class', 'counter');

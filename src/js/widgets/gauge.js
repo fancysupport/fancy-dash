@@ -1,6 +1,6 @@
 Dash.generate_gauge = function(widget) {
 	var that = this;
-	var format = d3.format('.4s');
+	var format = this.format;
 
 	var width = widget.size[0] * 200 - 20;
 	var height = widget.size[1] * 200 - 20;

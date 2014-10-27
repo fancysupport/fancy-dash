@@ -1,5 +1,3 @@
-{{ var f=d3.format('.4s'); }}
-
-<span style="color:{{= data.colour }}; font-size:{{= 30*data.size[0]+'px' }};" class="value">{{= f(data.amount) }}</span>
+<span style="color:{{= data.colour }}; font-size:{{= 30*data.size[0]+'px' }};" class="value">{{= Dash.format(data.amount) }}</span>
 <br/>
 <span style="color:{{= data.colour }}; font-size:{{= 13*data.size[0]+'px' }};" class="name">{{= data.name }}</span>
