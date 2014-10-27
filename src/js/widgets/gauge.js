@@ -38,6 +38,7 @@ Dash.generate_gauge = function(widget) {
 				};
 
 				node.selectAll('.gauge').remove();
+				node.selectAll('text').remove();
 
 				var max_value = widget.config.max_value;
 				var current_value = source.data;
