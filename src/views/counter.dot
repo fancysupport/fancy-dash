@@ -1,3 +1,3 @@
-<span style="color:{{= data.colour }}; font-size:{{= 30*data.size[0]+'px' }};" class="value">{{= Dash.format(data.amount) }}</span>
+<span style="color:{{= data.colour }}; font-size:{{= data.size[0]+'px' }};" class="value">{{= Dash.format(data.amount) }}</span>
 <br/>
-<span style="color:{{= data.colour }}; font-size:{{= 13*data.size[0]+'px' }};" class="name">{{= data.name }}</span>
+<span style="color:{{= data.colour }}; font-size:{{= data.size[1]+'px' }};" class="name">{{= data.name }}</span>
