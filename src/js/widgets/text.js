@@ -11,29 +11,20 @@ Dash.generate_text = function(widget) {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
 				console.log('new data text', ok.data);
-				var sources = [];
 
-				for (var i=0; i<ok.data.length; i++) {
-					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].source_id === widget.sources[j].id) {
-							sources.push({
-								data: ok.data[i].values[0][1],
-								colour: widget.sources[j].config.colour
-							});
-						}
-					}
-				}
+				var source = {
+					data: ok.data[0].values[0][1],
+					colour: widget.sources[0].config.colour,
+					font_size: parseFloat(widget.config.font_size) || 16,
+				};
 
-				node.selectAll('p').remove();
+				node.selectAll('span').remove();
 
-				if (sources.length === 0) return;
-
-				for (i=0; i<sources.length; i++) {
-					var t = text.appendChild(that.make_node(Templates.text({
-						data: sources[i].data,
-						colour: sources[i].colour
-					})));
-				}
+				var t = text.appendChild(that.make_node(Templates.text({
+					data: source.data,
+					colour: source.colour,
+					font_size: source.font_size
+				})));
 			}
 		});
 	}

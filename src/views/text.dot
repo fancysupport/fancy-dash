@@ -1,1 +1,1 @@
-<p style="color:{{= data.colour }};">{{! data.data }}</p>
+<span style="color:{{= data.colour }}; font-size:{{= data.font_size+'px' }};">{{! data.data }}</span>
