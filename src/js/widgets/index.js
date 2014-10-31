@@ -7,7 +7,7 @@ import "image";
 import "countdown";
 import "counter";
 import "gauge";
-import "smiley";
+import "status";
 import "fancy_customers_impressions";
 import "fancy_customers_count";
 import "fancy_customers_signups";
