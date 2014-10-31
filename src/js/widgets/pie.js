@@ -65,7 +65,7 @@ Dash.generate_pie = function(widget) {
 						.style('fill', function(d, i) {
 							return sources[i].colour;
 						})
-						.on('mouseover', function(d, e, i) {
+						.on('mousemove', function(d, e, i) {
 							tip.show.call(this, d, e, i, d3.event);
 						})
 						.on('mouseout', tip.hide);
