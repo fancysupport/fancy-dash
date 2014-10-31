@@ -1,1 +1,1 @@
-<span style="color:{{= data.colour }}; font-size:{{= data.font_size+'px' }};">{{! data.data }}</span>
+<span style="color:{{= data.colour }}; font-size:{{= data.font_size+'px' }};" class="{{= data.center }}">{{! data.data }}</span>

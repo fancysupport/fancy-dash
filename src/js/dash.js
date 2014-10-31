@@ -51,15 +51,6 @@ var Dash = {
 		else this.render_empty();
 	},
 
-	entries: function(map) {
-		var e = [];
-		for (var key in map) e.push({
-			key: key,
-			value: map[key]
-		});
-		return e;
-	},
-
 	id: function(q) {
 		return document.getElementById(q);
 	},
@@ -139,6 +130,8 @@ var Dash = {
 
 		var d = this.active;
 
+		document.title = d.name;
+
 		for (var i=0; i<d.widgets.length; i++) {
 			this.init_widget(d.widgets[i]);
 		}
@@ -216,10 +209,12 @@ var Dash = {
 	},
 
 	render_notfound: function() {
+		document.title = 'Fancy Dashboard';
 		this.app.innerHTML = Templates.notfound();
 	},
 
 	render_empty: function() {
+		document.title = 'Fancy Dashboard';
 		this.app.innerHTML = Templates.empty();
 	},
 
