@@ -42,12 +42,31 @@ Dash.generate_countdown = function(widget) {
 				if (that.intervals[widget.id].length === 2)
 					clearInterval(that.intervals[widget.id][1]);
 
+				var size = widget.size;
+
+				var big = 25 * size[0] * 2;
+				var small = 12.5 * size[0] * 2;
+
+				if (size[0] > size[1] || size[0] === size[1]) {
+					big *= 0.8;
+					small *= 0.8;
+				}
+
+				if (size[0] === 1 && size[1] === 1) {
+					big *= 0.9;
+					small *= 0.9;
+				}
+
+				if (big > size[1]*200/2) {
+					big = size[1]*200 * 0.4;
+					small = big * 0.6;
+				}
+
 				var update = function() {
-					// only do one source
 					count.html(Templates.countdown({
 						data: difference(parseFloat(ok.data[0].values[0][1]) || 0),
 						colour: widget.sources[0].config.colour,
-						size: widget.size
+						size: [big, small]
 					}));
 				};
 
