@@ -179,5 +179,5 @@ Dash.generate_line = function(widget) {
 
 	draw();
 	this.intervals[widget.id] = this.intervals[widget.id] || [];
-	this.intervals[widget.id].push(setInterval(draw, 1000));
+	this.intervals[widget.id].push(setInterval(draw, 60*1000));
 };

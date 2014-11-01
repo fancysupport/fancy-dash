@@ -1,4 +1,4 @@
-Dash.generate_fancy_customers_impressions = function(widget) {
+Dash.generate_graph = function(widget) {
 	var graph_type = widget.config.graph_type;
 
 	if (graph_type === 'line') return this.generate_line(widget);

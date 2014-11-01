@@ -1,6 +1,7 @@
 import "legends";
 import "bar";
 import "line";
+import "graph";
 import "pie";
 import "text";
 import "image";
@@ -8,7 +9,3 @@ import "countdown";
 import "counter";
 import "gauge";
 import "status";
-import "fancy_customers_impressions";
-import "fancy_customers_count";
-import "fancy_customers_signups";
-import "fancy_messages_open";
