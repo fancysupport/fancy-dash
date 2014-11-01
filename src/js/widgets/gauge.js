@@ -5,8 +5,12 @@ Dash.generate_gauge = function(widget) {
 	var width = widget.size[0] * 200 - 20;
 	var height = widget.size[1] * 200 - 20;
 
-	var offset_x = width/2;// - (width > 200 && width >= height ? width/4 : 0);
-	var offset_y = height/2.5;// - (height > width ? height/4 : 0);
+	var offset_x = width/2;
+	var offset_y = height/2.5;
+
+	if (widget.size[1] > widget.size[0]) {
+		offset_y = height / 2.24;
+	}
 
 	var node = d3.select('[data-id="' + widget.id + '"]');
 	var svg = node.append('svg')

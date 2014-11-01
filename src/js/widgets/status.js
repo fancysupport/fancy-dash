@@ -43,8 +43,8 @@ Dash.generate_status = function(widget) {
 				var icon = check(source.data) ? happy_smiley : sad_smiley;
 
 				var smiley = svg.append('g')
-					.attr('transform', 'translate(-62,0)')
-					.attr('class', 'smiley');
+					.attr('transform', 'translate(-62, 15)')
+					.attr('class', 'status');
 
 				smiley.append('path')
 					.style('fill', source.colour)
@@ -56,7 +56,7 @@ Dash.generate_status = function(widget) {
 				svg.append('text')
 					.attr('text-anchor', 'middle')
 					.style('font-size', font_size+'px')
-					.attr('dy', 150+'px')
+					.attr('dy', 150+10+'px')
 					.style('fill', source.colour)
 					.text(source.name);
 			}
