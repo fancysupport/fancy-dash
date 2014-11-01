@@ -29,8 +29,6 @@ Dash.generate_gauge = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data gauge', ok.data);
-
 				var source = {
 					data: parseFloat(ok.data[0].values[0][1]) || 0,
 					colour: widget.sources[0].config.colour,

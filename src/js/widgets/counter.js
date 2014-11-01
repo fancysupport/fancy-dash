@@ -7,8 +7,6 @@ Dash.generate_counter = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data counter', ok.data);
-
 				var big = 25 * widget.size[0] * 2;
 				var small = 12.5 * widget.size[0] * 2;
 

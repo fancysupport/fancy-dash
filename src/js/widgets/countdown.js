@@ -39,8 +39,6 @@ Dash.generate_countdown = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data countdown', ok.data);
-
 				if (that.intervals[widget.id].length === 2)
 					clearInterval(that.intervals[widget.id][1]);
 

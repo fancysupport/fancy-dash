@@ -31,8 +31,6 @@ Dash.generate_status = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data thumbs', ok.data);
-
 				var source = {
 					data: ok.data[0].values[0][1],
 					colour: widget.sources[0].config.colour,

@@ -64,7 +64,10 @@ Dash.generate_line = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data line', ok.data);
+				ok.data.sort(function(a,b){
+					return a.source_id > b.source_id;
+				});
+
 				var sources = [];
 
 				for (var i=0; i<ok.data.length; i++) {
@@ -176,5 +179,5 @@ Dash.generate_line = function(widget) {
 
 	draw();
 	this.intervals[widget.id] = this.intervals[widget.id] || [];
-	this.intervals[widget.id].push(setInterval(draw, 60*1000));
+	this.intervals[widget.id].push(setInterval(draw, 1000));
 };

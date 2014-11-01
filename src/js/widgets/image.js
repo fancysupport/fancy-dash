@@ -11,8 +11,6 @@ Dash.generate_image = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data image', ok.data);
-
 				node.selectAll('img').remove();
 
 				image.appendChild(that.make_node(Templates.image({

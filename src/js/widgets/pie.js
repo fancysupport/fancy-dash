@@ -33,7 +33,10 @@ Dash.generate_pie = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				console.log('new data pie', ok.data);
+				ok.data.sort(function(a,b){
+					return a.source_id > b.source_id;
+				});
+
 				var sources = [];
 
 				for (var i=0; i<ok.data.length; i++) {
