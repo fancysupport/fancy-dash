@@ -39,7 +39,6 @@ var Dash = {
 
 	hash_changed: function() {
 		var token = window.location.hash.slice(1);
-		console.log('new hash:', token);
 
 		for (var id in this.intervals) {
 			for (var i=0; i<id.length; i++) {
@@ -145,8 +144,6 @@ var Dash = {
 
 		this.render_widget(w);
 
-		console.log('widget', w);
-
 		var type = w.type.replace(/:/g, '_');
 		this['generate_'+type](w);
 	},
@@ -158,9 +155,7 @@ var Dash = {
 			method: 'GET',
 			url: '/dashboards/' + token
 		}, function(ok, err) {
-			console.log('dash', ok, err);
-
-			if (ok)	{
+			if (ok && ok.data)	{
 				that.active = ok.data;
 				that.init_dash();
 			}
