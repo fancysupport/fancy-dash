@@ -166,10 +166,18 @@ var Dash = {
 	},
 
 	get_widget_data: function(w, cb) {
+		var that = this;
+
 		this.ajax({
 			method: 'GET',
 			url: '/dashboards/' + this.active.token + '/widgets/' + w.id + '/data'
-		}, cb);
+		}, function(ok, err) {
+			// widget is gone, need to update dash
+			if (err && (err.code === 404 || err.code === 400))
+				return that.hash_changed();
+
+			cb(ok, err);
+		});
 	},
 
 	ajax: function (opts, cb) {
