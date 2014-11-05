@@ -20,10 +20,37 @@ Dash.generate_counter = function(widget) {
 					small = big * 0.6;
 				}
 
-				counter.html(Templates.counter({
-					amount: parseFloat(ok.data[0].values[0][1]) || 0,
+				var source = {
+					data: parseFloat(ok.data[0].values[0][1]) || 0,
 					colour: widget.sources[0].config.colour,
 					name: widget.sources[0].name,
+				};
+
+				var display = Dash.format(source.data);
+				if (widget.sources[0].source === 'fancy:messages:avg_response_time') {
+					var num = source.data, unit;
+
+					if (num/60 < 1) {
+						num = source.data;
+						unit = 's';
+					} else if (num/(60*60) < 1) {
+						num = source.data/60;
+						unit = 'm';
+					} else if (num/(60*60*24) < 1) {
+						num = source.data/(60*60);
+						unit = 'h';
+					} else {
+						num = source.data/(60*60*24);
+						unit = 'd';
+					}
+
+					display = Number(num.toFixed(1)) + unit;
+				}
+
+				counter.html(Templates.counter({
+					amount: display,
+					colour: source.colour,
+					name: source.name,
 					size: [big, small]
 				}));
 			}
