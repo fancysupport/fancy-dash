@@ -71,12 +71,12 @@ Dash.generate_countdown = function(widget) {
 				};
 
 				update();
-				that.intervals[widget.id].push(setInterval(update, 1000));
+				that.intervals[widget.id][1] = setInterval(update, 1000);
 			}
 		});
 	}
 
 	draw();
 	this.intervals[widget.id] = this.intervals[widget.id] || [];
-	this.intervals[widget.id].push(setInterval(draw, 60*1000));
+	this.intervals[widget.id][0] = setInterval(draw, 60*1000);
 };
