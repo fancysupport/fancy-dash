@@ -41,8 +41,11 @@ var Dash = {
 		var token = window.location.hash.slice(1);
 
 		for (var id in this.intervals) {
-			for (var i=0; i<id.length; i++) {
-				clearInterval(id[i]);
+			if (this.intervals.hasOwnProperty(id)) {
+				var timers = this.intervals[id];
+				for (var i=0; i<timers.length; i++) {
+					clearInterval(timers[i]);
+				}
 			}
 		}
 
@@ -137,8 +140,6 @@ var Dash = {
 	},
 
 	init_widget: function(w) {
-		var that = this;
-
 		// assign to list to keep track easier
 		this.widgets[w.id] = w;
 
@@ -146,6 +147,10 @@ var Dash = {
 
 		var type = w.type.replace(/:/g, '_');
 		this['generate_'+type](w);
+	},
+
+	remove_widget: function(w) {
+
 	},
 
 	get_dash: function(token) {
