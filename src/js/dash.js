@@ -42,7 +42,7 @@ var Dash = {
 
 		for (var id in this.intervals) {
 			if (this.intervals.hasOwnProperty(id)) {
-				var timers = this.intervals[id];
+				var timers = this.intervals[id] || [];
 				for (var i=0; i<timers.length; i++) {
 					clearInterval(timers[i]);
 				}
@@ -134,12 +134,42 @@ var Dash = {
 
 		document.title = d.name;
 
+		var incomming = {};
+
+		// handle new and modified widgets
 		for (var i=0; i<d.widgets.length; i++) {
 			this.init_widget(d.widgets[i]);
+			incomming[d.widgets[i].id] = true;
+		}
+
+		// handle deleted widgets
+		for (var id in this.widgets) {
+			if (this.widgets.hasOwnProperty(id) && ! incomming[id]) {
+				this.remove_widget(this.widgets[id]);
+			}
 		}
 	},
 
 	init_widget: function(w) {
+		// remove values since we get those from the data anyway
+		delete w.values;
+
+		var n = JSON.stringify(w);
+		var o = JSON.stringify(this.widgets[w.id]);
+
+		// this is a new widget
+		if (o === undefined) {
+			return this.create_widget(w);
+		}
+
+		// the new widgets differs from the old widget
+		if (n !== o) {
+			this.remove_widget(w);
+			this.create_widget(w);
+		}
+	},
+
+	create_widget: function(w) {
 		// assign to list to keep track easier
 		this.widgets[w.id] = w;
 
@@ -150,7 +180,12 @@ var Dash = {
 	},
 
 	remove_widget: function(w) {
+		var timers = this.intervals[w.id] || [];
+		for (var i=0; i<timers.length; i++) {
+			clearInterval(timers[i]);
+		}
 
+		d3.select('[data-id="' + w.id + '"]').remove();
 	},
 
 	get_dash: function(token) {
@@ -165,8 +200,10 @@ var Dash = {
 				that.init_dash();
 			}
 
-			if (err && err.code === 404)
+			if (err && err.code === 404) {
+				that.widgets = {};
 				that.render_notfound();
+			}
 		});
 	},
 
@@ -179,7 +216,7 @@ var Dash = {
 		}, function(ok, err) {
 			// widget is gone, need to update dash
 			if (err && (err.code === 404 || err.code === 400))
-				return that.hash_changed();
+				return that.get_dash(that.active.token);
 
 			cb(ok, err);
 		});
@@ -227,7 +264,30 @@ var Dash = {
 	},
 
 	render_dash: function() {
-		this.app.innerHTML = Templates.dash(this.active);
+		var app = d3.select('#app');
+		var dash = app.select('#dash');
+
+		// there's already a dash there
+		if ( ! dash.empty()) {
+			this.style_dash(dash);
+		} else { // need to create the initial dash
+			app.html('');
+			this.style_dash(app.append('div'));
+		}
+	},
+
+	style_dash: function(node) {
+		var size = this.active.size;
+		var width = size[0] * 200;
+		var height = size[1] * 200;
+
+		node
+			.attr('id', 'dash')
+			.attr('data-token', this.active.token)
+			.style('width', width + 'px')
+			.style('height', height + 'px')
+			.style('margin-left', -width/2 + 'px')
+			.style('margin-top', -height/2 + 'px');
 	},
 
 	render_widget: function(widget) {
