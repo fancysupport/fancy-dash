@@ -38,7 +38,9 @@ var Dash = {
 	},
 
 	hash_changed: function() {
+		var that = this;
 		var token = window.location.hash.slice(1);
+		clearInterval(this.intervals.dash_poll);
 
 		for (var id in this.intervals) {
 			if (this.intervals.hasOwnProperty(id)) {
@@ -49,7 +51,12 @@ var Dash = {
 			}
 		}
 
-		if (token) this.get_dash(token);
+		if (token) {
+			this.get_dash(token);
+			this.intervals.dash_poll = setInterval(function() {
+				that.get_dash(token);
+			}, 10*60*1000);
+		}
 		else this.render_empty();
 	},
 
