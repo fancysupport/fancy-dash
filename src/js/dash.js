@@ -262,11 +262,13 @@ var Dash = {
 
 	render_notfound: function() {
 		document.title = 'Fancy Dashboard';
+		d3.select('body').style('background-color', null);
 		this.app.innerHTML = Templates.notfound();
 	},
 
 	render_empty: function() {
 		document.title = 'Fancy Dashboard';
+		d3.select('body').style('background-color', null);
 		this.app.innerHTML = Templates.empty();
 	},
 
@@ -281,6 +283,9 @@ var Dash = {
 			app.html('');
 			this.style_dash(app.append('div'));
 		}
+
+		// make background colour what they want it to be
+		d3.select('body').style('background-color', this.active.config.colour);
 	},
 
 	style_dash: function(node) {
