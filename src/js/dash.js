@@ -192,7 +192,8 @@ var Dash = {
 			clearInterval(timers[i]);
 		}
 
-		d3.select('[data-id="' + w.id + '"]').remove();
+		// remove widget and d3-tip if its there
+		d3.selectAll('[data-id="' + w.id + '"]').remove();
 	},
 
 	get_dash: function(token) {

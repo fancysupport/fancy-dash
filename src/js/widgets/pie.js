@@ -28,7 +28,8 @@ Dash.generate_pie = function(widget) {
 		.innerRadius(radius*ir);
 
 	var tip = d3.tip()
-		.attr('class', 'd3-tip');
+		.attr('class', 'd3-tip')
+		.attr('data-id', widget.id);
 
 	svg.call(tip);
 

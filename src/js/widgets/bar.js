@@ -52,7 +52,8 @@ Dash.generate_bar = function(widget) {
 		.attr('class', 'y axis');
 
 	var tip = d3.tip()
-		.attr('class', 'd3-tip');
+		.attr('class', 'd3-tip')
+		.attr('data-id', widget.id);
 
 	svg.call(tip);
 

@@ -57,7 +57,8 @@ Dash.generate_line = function(widget) {
 		.attr('class', 'y axis');
 
 	var tip = d3.tip()
-		.attr('class', 'd3-tip');
+		.attr('class', 'd3-tip')
+		.attr('data-id', widget.id);
 
 	svg.call(tip);
 
