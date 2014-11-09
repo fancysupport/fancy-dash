@@ -21,9 +21,11 @@ Dash.generate_pie = function(widget) {
 	var radius = Math.min(width, height) / 3;
 	if (width === height && width > 200) radius /= 1.5;
 
+	var ir = widget.config.donut ? 0.6 : 0;
+
 	var arc = d3.svg.arc()
 		.outerRadius(radius)
-		.innerRadius(radius*0.6);
+		.innerRadius(radius*ir);
 
 	var tip = d3.tip()
 		.attr('class', 'd3-tip');
