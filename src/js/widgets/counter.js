@@ -20,8 +20,13 @@ Dash.generate_counter = function(widget) {
 					small = big * 0.6;
 				}
 
+				var data = 'no data';
+				try {
+					data = parseFloat(ok.data[0].values[0][1]) || 0;
+				} catch (e) {}
+
 				var source = {
-					data: parseFloat(ok.data[0].values[0][1]) || 0,
+					data: data,
 					colour: widget.sources[0].config.colour,
 					name: widget.sources[0].name,
 				};
@@ -44,7 +49,8 @@ Dash.generate_counter = function(widget) {
 						unit = 'd';
 					}
 
-					display = Number(num.toFixed(1)) + unit;
+					if (source.data === 'no data') display = source.data;
+					else display = Number(num.toFixed(1)) + unit;
 				}
 
 				counter.html(Templates.counter({
