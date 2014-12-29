@@ -21,7 +21,7 @@ Dash.generate_pie = function(widget) {
 	var radius = Math.min(width, height) / 3;
 	if (width === height && width > 200) radius /= 1.5;
 
-	var ir = widget.config.donut ? 0.6 : 0;
+	var ir = widget.config.donut === 'donut' ? 0.6 : 0;
 
 	var arc = d3.svg.arc()
 		.outerRadius(radius)
