@@ -99,6 +99,22 @@ gulp.task('min_css', ['stylus'], function() {
 
 gulp.task('minify', ['min_js', 'min_css']);
 
+gulp.task('vendor', function() {
+	var u = uglify()
+		.on('error', function(e) {
+			handle_error(e);
+			u.end();
+			return false;
+		});
+
+	return gulp.src(['dist/assets/vendor/d3.js', 'dist/assets/vendor/d3-tip.js'])
+		.pipe(concat('vendor.js'))
+		.pipe(gulp.dest('dist/assets/vendor'))
+		.pipe(u)
+		.pipe(concat('vendor.min.js'))
+		.pipe(gulp.dest('dist/assets/vendor'));
+});
+
 gulp.task('watch', function() {
 	livereload.listen();
 
@@ -116,4 +132,4 @@ gulp.task('watch', function() {
 	});
 });
 
-gulp.task('default', ['http', 'minify', 'watch']);
+gulp.task('default', ['http', 'vendor', 'minify', 'watch']);

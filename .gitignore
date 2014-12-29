@@ -17,6 +17,7 @@ node_modules
 
 build
 dist/assets/*.js
+dist/assets/vendor/vendor.*
 dist/assets/css/base.css
 dist/assets/css/base.min.css
 src/js/templates.js
