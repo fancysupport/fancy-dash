@@ -120,7 +120,7 @@ gulp.task('watch', function() {
 
 	gulp.watch('src/js/**/*.js', ['min_js']);
 
-	gulp.watch('src/css/**/*', ['stylus']);
+	gulp.watch('src/css/**/*', ['min_css']);
 	gulp.watch('src/views/**/*', ['dot']);
 
 	gulp.watch('dist/assets/dash.js').on('change', function(f) {

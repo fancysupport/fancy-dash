@@ -5,7 +5,6 @@ Dash.generate_countdown = function(widget) {
 	var node = d3.select('[data-id="' + widget.id + '"]');
 	var count = node.append('div')
 		.attr('class', 'countdown')
-		.style('height', widget.size[1]*200-20-30 + 'px')
 		.style('width', widget.size[0]*200-20-30 + 'px');
 
 	function difference(then) {
@@ -48,8 +47,8 @@ Dash.generate_countdown = function(widget) {
 				var small = 12.5 * size[0] * 2;
 
 				if (size[0] > size[1] || size[0] === size[1]) {
-					big *= 0.8;
-					small *= 0.8;
+					big *= 0.7;
+					small *= 0.7;
 				}
 
 				if (size[0] === 1 && size[1] === 1) {
@@ -58,16 +57,21 @@ Dash.generate_countdown = function(widget) {
 				}
 
 				if (big > size[1]*200/2) {
-					big = size[1]*200 * 0.4;
+					big = size[1]*200 * 0.325;
 					small = big * 0.6;
 				}
 
 				var update = function() {
+					var data = difference(parseFloat(ok.data[0].values[0][1]) || 0);
+
 					count.html(Templates.countdown({
-						data: difference(parseFloat(ok.data[0].values[0][1]) || 0),
+						data: data,
 						colour: widget.sources[0].config.colour,
-						size: [big, small]
+						size: [big, small],
+						name: widget.sources[0].name
 					}));
+
+					if (data.length === 0) clearInterval(that.intervals[widget.id][1]);
 				};
 
 				update();

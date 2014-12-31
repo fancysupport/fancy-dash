@@ -1,10 +1,6 @@
+<div class="fields">
 {{? data.data.length === 0 }}
-	<div class="field"></div>
-	<div class="field">
-		<span style="color:{{= data.colour }}; font-size:{{= data.size[0]+'px' }};" class="value">0</span>
-		<br/>
-		<span style="color:{{= data.colour }}; font-size:{{= data.size[1]+'px' }};" class="period">seconds</span>
-	</div>
+	<div style="color:{{= data.colour }}; font-size:{{= data.size[0]+'px' }};" class="finished">finished</div>
 {{??}}
 	{{~ data.data :v }}
 		<div class="field">
@@ -14,3 +10,5 @@
 		</div>
 	{{~}}
 {{?}}
+</div>
+<div style="color:{{= data.colour }}; font-size:{{= data.size[1]+'px' }};" class="label">{{= data.name}}</div>
