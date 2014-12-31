@@ -20,7 +20,7 @@ Dash.generate_counter = function(widget) {
 					small = big * 0.6;
 				}
 
-				var data = 'no data';
+				var data = '--';
 				try {
 					data = parseFloat(ok.data[0].values[0][1]) || 0;
 				} catch (e) {}
@@ -49,7 +49,7 @@ Dash.generate_counter = function(widget) {
 						unit = 'd';
 					}
 
-					if (source.data === 'no data') display = source.data;
+					if (source.data === '--') display = source.data;
 					else display = Number(num.toFixed(1)) + unit;
 				}
 
