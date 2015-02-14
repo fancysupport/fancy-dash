@@ -1,5 +1,23 @@
 @import "reset.css"
 
+vendor(prop, args)
+	-webkit-{prop} args
+	-moz-{prop} args
+	-ms-{prop} args
+	-o-{prop} args
+	{prop} args
+
+border-radius()
+	vendor('border-radius', arguments)
+
+box-shadow()
+	vendor('box-shadow', arguments)
+
+transform()
+	vendor('transform', arguments)
+
+
+
 body
 	background-color #F6F6F6
 
