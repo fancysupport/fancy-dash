@@ -149,7 +149,7 @@ Dash.generate_bar = function(widget) {
 					return d.x;
 				});
 
-				var bar_width = width/points*0.9;
+				var bar_width = width/points*0.8;
 
 				// all the points will be removed due to the fact the x key updates
 				rect.exit().remove();
