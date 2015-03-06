@@ -1,7 +1,7 @@
 <ul>
 	{{~ data :m }}
 		<li>
-			<span class="title">{{= m.name }}</span>
+			<span class="name">{{= m.name }}</span>
 			<span class="value">
 				{{= Dash.format(m.total) }}
 				<span class="key" style="background-color:{{= m.colour }}"></span>
