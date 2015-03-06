@@ -7,19 +7,6 @@ Dash.generate_counter = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				var big = 25 * widget.size[0] * 2;
-				var small = 12.5 * widget.size[0] * 2;
-
-				if (widget.size[0] > widget.size[1]) {
-					big *= 0.8;
-					small *= 0.8;
-				}
-
-				if (big > widget.size[1]*200/2) {
-					big = widget.size[1]*200 * 0.4;
-					small = big * 0.6;
-				}
-
 				var data = '--';
 				try {
 					data = parseFloat(ok.data[0].values[0][1]) || 0;
@@ -53,11 +40,18 @@ Dash.generate_counter = function(widget) {
 					else display = Number(num.toFixed(1)) + unit;
 				}
 
+				var scale = Math.min(widget.size[0], widget.size[1]);
+				var font_size =  scale * 25;
+				if (font_size > 35) font_size = 35;
+				if (widget.size[0] === widget.size[1]) font_size /= 1.2;
+				if (font_size < 25) font_size = 25;
+				font_size *= scale;
+
 				counter.html(Templates.counter({
 					amount: display,
 					colour: source.colour,
 					name: source.name,
-					size: [big, small]
+					size: [font_size*2.25, font_size]
 				}));
 			}
 		});

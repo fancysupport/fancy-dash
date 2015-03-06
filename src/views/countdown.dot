@@ -11,4 +11,4 @@
 	{{~}}
 {{?}}
 </div>
-<div style="color:{{= data.colour }}; font-size:{{= data.size[1]+'px' }};" class="label">{{= data.name}}</div>
+<div style="color:{{= data.colour }}; font-size:{{= data.size[2]+'px' }};" class="title">{{= data.name}}</div>

@@ -37,27 +37,32 @@ Dash.generate_status = function(widget) {
 					name: widget.sources[0].name,
 				};
 
-				node.selectAll('.smiley').remove();
-				node.selectAll('text').remove();
+				node.selectAll('.status').remove();
+				node.selectAll('.title').remove();
 
 				var icon = check(source.data) ? happy_smiley : sad_smiley;
 
 				var smiley = svg.append('g')
-					.attr('transform', 'translate(-62, 15)')
+					.attr('transform', 'translate(-62, 10)')
 					.attr('class', 'status');
 
 				smiley.append('path')
 					.style('fill', source.colour)
 					.attr('d', icon);
 
-				var font_size = scale * 24;
-				if (font_size > 30) font_size = 30;
+				var font_size = scale * 25;
+				if (font_size > 35) font_size = 35;
+				if (widget.size[0] === widget.size[1]) font_size /= 1.2;
+				if (font_size < 25) font_size = 25;
+				font_size *= scale;
 
-				svg.append('text')
-					.attr('text-anchor', 'middle')
-					.style('font-size', font_size+'px')
-					.attr('dy', 150+10+'px')
-					.style('fill', source.colour)
+				node.append('div')
+					.style({
+						'font-size': font_size+'px',
+						'color': source.colour,
+						'width': width+'px'
+					})
+					.attr('class', 'title')
 					.text(source.name);
 			}
 		});

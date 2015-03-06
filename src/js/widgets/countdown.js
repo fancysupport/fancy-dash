@@ -43,23 +43,15 @@ Dash.generate_countdown = function(widget) {
 
 				var size = widget.size;
 
-				var big = 25 * size[0] * 2;
-				var small = 12.5 * size[0] * 2;
+				var scale = Math.min(widget.size[0], widget.size[1]);
+				var font_size =  scale * 25;
+				if (font_size > 35) font_size = 35;
+				if (widget.size[0] === widget.size[1]) font_size /= 1.2;
+				if (font_size < 25) font_size = 25;
+				font_size *= scale;
 
-				if (size[0] > size[1] || size[0] === size[1]) {
-					big *= 0.7;
-					small *= 0.7;
-				}
-
-				if (size[0] === 1 && size[1] === 1) {
-					big *= 0.9;
-					small *= 0.9;
-				}
-
-				if (big > size[1]*200/2) {
-					big = size[1]*200 * 0.325;
-					small = big * 0.6;
-				}
+				var big = 1.5;
+				var small = 0.8;
 
 				var update = function() {
 					var data = difference(parseFloat(ok.data[0].values[0][1]) || 0);
@@ -67,7 +59,7 @@ Dash.generate_countdown = function(widget) {
 					count.html(Templates.countdown({
 						data: data,
 						colour: widget.sources[0].config.colour,
-						size: [big, small],
+						size: [font_size*big, font_size*small, font_size],
 						name: widget.sources[0].name
 					}));
 

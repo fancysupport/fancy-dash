@@ -58,6 +58,16 @@ body
 		left 50%
 		top 50%
 		transform translate(-50%, -50%)
+		text-align center
+		width 100%
+		height 100%
+
+		.fields
+			width 100%
+			position relative
+			top 25%
+			transform translateY(-25%)
+
 
 		.field
 			text-align center
@@ -68,23 +78,28 @@ body
 				position relative
 				top -0.5em
 
-		.label, .finished
+		.finished
 			display inline-block
 			text-align center
 			width 100%
 
-		.label
-			transform translate(0, -45%)
+		.title
+			width 100%
 
 	.counter
+		width 100%
+		height 100%
 		text-align center
 		position relative
-		top 50%
-		transform translate(0, -50%)
 
-		.name
-			position relative
-			top -0.5em
+		.value
+			position absolute
+			top 45%
+			transform translateY(-50%)
+			width 100%
+
+		.title
+			width 100%
 
 	.image
 		//margin 15px
@@ -104,6 +119,11 @@ body
 			left 50%
 			top 50%
 			transform translate(-50%, -50%)
+
+	.title
+		position absolute
+		bottom 5%
+		text-align center
 
 	svg
 		position absolute

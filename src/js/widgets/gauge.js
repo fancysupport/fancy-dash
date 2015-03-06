@@ -40,7 +40,7 @@ Dash.generate_gauge = function(widget) {
 				};
 
 				node.selectAll('.gauge').remove();
-				node.selectAll('text').remove();
+				node.selectAll('.title').remove();
 
 				var max_value = widget.config.max_value;
 				var current_value = source.data;
@@ -75,15 +75,19 @@ Dash.generate_gauge = function(widget) {
 					.text(format(max_value));
 
 				var scale = Math.min(widget.size[0], widget.size[1]);
-				font_size =  scale * 24;
-				if (font_size > 30) font_size = 30;
+				font_size =  scale * 25;
+				if (font_size > 35) font_size = 35;
+				if (widget.size[0] === widget.size[1]) font_size /= 1.2;
+				if (font_size < 25) font_size = 25;
 				font_size *= scale;
 
-				svg.append('text')
-					.attr('text-anchor', 'middle')
-					.style('font-size', font_size+'px')
-					.attr('dy', 85*scale+'px')
-					.style('fill', source.colour)
+				node.append('div')
+					.style({
+						'font-size': font_size+'px',
+						'color': source.colour,
+						'width': width+'px'
+					})
+					.attr('class', 'title')
 					.text(source.name);
 			}
 		});
