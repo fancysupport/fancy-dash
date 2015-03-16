@@ -2,7 +2,7 @@ import "domready";
 import "templates";
 
 var Dash = {
-	url: 'http://api.fancysupport.com:4000/public',
+	url: 'https://api.fancysupport.com/public',
 	active: null,
 	widgets: {},
 	app: null,
@@ -22,7 +22,6 @@ var Dash = {
 		// cache
 		this.app = this.id('app');
 
-		// TODO fix dot compiler to remove this needing to be on the prototype
 		String.prototype.encodeHTML = function() {
 			var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;' },
 			matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
@@ -153,6 +152,7 @@ var Dash = {
 		for (var id in this.widgets) {
 			if (this.widgets.hasOwnProperty(id) && ! incomming[id]) {
 				this.remove_widget(this.widgets[id]);
+				delete this.widgets[id];
 			}
 		}
 	},
@@ -243,8 +243,8 @@ var Dash = {
 			return {code: req.status, data: result};
 		};
 
-		var XHR = XMLHttpRequest || ActiveXObject;
-		var request = new XHR('MSXML2.XMLHTTP.3.0');
+		var XHR = XMLHttpRequest;
+		var request = new XHR();
 
 		request.open(opts.method, that.url+opts.url, true);
 
