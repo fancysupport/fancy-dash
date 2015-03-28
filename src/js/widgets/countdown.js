@@ -41,6 +41,9 @@ Dash.generate_countdown = function(widget) {
 				if (that.intervals[widget.id].length === 2)
 					clearInterval(that.intervals[widget.id][1]);
 
+				var value = ok.data.data[0].value;
+				value = parseFloat(value) || 0;
+
 				var size = widget.size;
 
 				var scale = Math.min(widget.size[0], widget.size[1]);
@@ -54,7 +57,7 @@ Dash.generate_countdown = function(widget) {
 				var small = 0.8;
 
 				var update = function() {
-					var data = difference(parseFloat(ok.data[0].values[0][1]) || 0);
+					var data = difference(value);
 
 					count.html(Templates.countdown({
 						data: data,
