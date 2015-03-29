@@ -10,8 +10,10 @@ Dash.generate_text = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
+				var value = ok.data.data[0].value;
+
 				var source = {
-					data: ok.data[0].values[0][1],
+					data: value,
 					colour: widget.sources[0].config.colour,
 					font_size: parseFloat(widget.config.font_size) || 16,
 					center: widget.config.center ? 'center' : ''

@@ -31,8 +31,10 @@ Dash.generate_status = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
+				var value = ok.data.data[0].value;
+
 				var source = {
-					data: ok.data[0].values[0][1],
+					data: value,
 					colour: widget.sources[0].config.colour,
 					name: widget.sources[0].name,
 				};

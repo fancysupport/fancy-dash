@@ -71,7 +71,7 @@ Dash.generate_bar = function(widget) {
 						if (ok.data[i].source_id === widget.sources[j].id) {
 
 							sources.push({
-								data: ok.data[i].values,
+								data: ok.data.data[i].values,
 								colour: widget.sources[j].config.colour,
 								name: widget.sources[j].name
 							});

@@ -9,7 +9,8 @@ Dash.generate_counter = function(widget) {
 			if (ok && ok.data) {
 				var data = '--';
 				try {
-					data = parseFloat(ok.data[0].values[0][1]) || 0;
+					data = ok.data.data[0].value;
+					data = parseFloat(value) || 0;
 				} catch (e) {}
 
 				var source = {

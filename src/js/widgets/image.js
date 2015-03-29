@@ -13,8 +13,10 @@ Dash.generate_image = function(widget) {
 			if (ok && ok.data) {
 				node.selectAll('img').remove();
 
+				var value = ok.data.data[0].value;
+
 				image.appendChild(that.make_node(Templates.image({
-					data: ok.data[0].values[0][1]
+					data: value
 				})));
 			}
 		});
