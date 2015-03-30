@@ -77,11 +77,12 @@ var Dash = {
 
 	generate_times: function(interval) {
 		var times = {
-			minute: {points: 61, period: 1000},
-			hour: {points: 61, period: 1000*60},
-			day: {points:25, period: 1000*60*60},
-			week: {points:9, period: 1000*60*60*24},
-			month: {points:31, period: 1000*60*60*24}
+			minute: {points: 60, period: 1000},
+			hour: {points: 60, period: 1000*60},
+			day: {points:24, period: 1000*60*60},
+			week: {points:7, period: 1000*60*60*24},
+			month: {points:30, period: 1000*60*60*24},
+			year: {points: 12, period: 1000*60*60*24*30}
 		};
 
 		return times[interval];
@@ -97,6 +98,9 @@ var Dash = {
 		};
 
 		for (var i=0; i<sources.length; i++) {
+			var data = sources[i].data;
+
+
 			stack[i] = {
 				name: sources[i].name,
 				colour: sources[i].colour,
@@ -320,6 +324,7 @@ var Dash = {
 		else if (offset < (t.HOUR * 24))     span = [ Math.round(Math.abs(offset / t.HOUR)), 'hr' ];
 		else if (offset < (t.DAY * 7))       span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
 		else if (offset < (t.DAY * 31))      span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
+		else if (offset < (t.DAY * 366))      span = [ Math.round(Math.abs(offset / t.DAY/30)), 'month' ];
 		else                               span = [ '', 'a long time' ];
 
 

@@ -5,13 +5,17 @@ Dash.generate_bar = function(widget) {
 	var time = this.generate_times(widget.config.time);
 	var period = time.period;
 	var points = time.points;
+	var indexes = time.indexes;
 
 	var margin = {top: 30, right: 10, bottom: 35, left: 43};
 	var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 	var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
+	var bar_width = width/points*0.8;
+
+	// full bar gap either side for padding
 	var x = d3.scale.linear()
-		.range([0, width]);
+		.range([bar_width*2, width-bar_width*2]);
 
 	var y = d3.scale.linear()
 		.range([height, 0]);
@@ -85,7 +89,9 @@ Dash.generate_bar = function(widget) {
 				var layeredData = stack(data);
 
 				// an extra period at either end for padding?
-				x.domain([Date.now()-points*period, Date.now()+period]);
+				//x.domain([Date.now()-points*period, Date.now()+period]);
+				var v = data[0].values;
+				x.domain([v[0].x, v[v.length-1].x]);
 
 				var min = d3.min(layeredData, function(layer) {
 					return d3.min(layer.values, function(d) {
@@ -110,16 +116,10 @@ Dash.generate_bar = function(widget) {
 				svg.select('.y.axis').call(yAxis);
 
 				// remove most of the ticks
+				var p = points-1;
 				svg.selectAll('.x.axis > .tick')
 					.each(function(d, i) {
-						var p = points-1;
-						if (width < 200) {
-							if (i !== 0 && i !== p-1)
-								this.remove();
-							return;
-						}
-
-						if (i !== 0 && i !== p && i !== Math.round(p/2) && i !== Math.round(p/4) && i !== Math.round(3*p/4))
+						if (i !== 0 && i !== p && i !== Math.round(p/2))
 							d3.select(this).remove();
 					});
 
@@ -148,8 +148,6 @@ Dash.generate_bar = function(widget) {
 				}, function(d) {
 					return d.x;
 				});
-
-				var bar_width = width/points*0.8;
 
 				// all the points will be removed due to the fact the x key updates
 				rect.exit().remove();
