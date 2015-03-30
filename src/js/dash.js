@@ -98,14 +98,14 @@ var Dash = {
 		};
 
 		for (var i=0; i<sources.length; i++) {
-			var data = sources[i].data;
-
-
 			stack[i] = {
 				name: sources[i].name,
 				colour: sources[i].colour,
 				values: sources[i].data.map(cb)
 			};
+
+			// set the text of the last point to 'now'
+			stack[i].values[stack[i].values.length-1].timeago = 'now';
 		}
 
 		stack.sort(function(a,b){return a.id>b.id;});
