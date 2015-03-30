@@ -36,15 +36,15 @@ Dash.generate_pie = function(widget) {
 	function draw() {
 		that.get_widget_data(widget, function(ok, err) {
 			if (ok && ok.data) {
-				ok.data.sort(function(a,b){
+				ok.data.data.sort(function(a,b){
 					return a.source_id > b.source_id;
 				});
 
 				var sources = [];
 
-				for (var i=0; i<ok.data.length; i++) {
+				for (var i=0; i<ok.data.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
-						if (ok.data[i].source_id === widget.sources[j].id) {
+						if (ok.data.data[i].source_id === widget.sources[j].id) {
 							var value = ok.data.data[0].value;
 							value = parseFloat(value) || 0;
 
