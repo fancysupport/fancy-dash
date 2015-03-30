@@ -77,40 +77,15 @@ var Dash = {
 
 	generate_times: function(interval) {
 		var times = {
-			minute: {points: 61, period: 1000},
-			hour: {points: 61, period: 1000*60},
-			day: {points:25, period: 1000*60*60},
-			week: {points:9, period: 1000*60*60*24},
-			month: {points:31, period: 1000*60*60*24}
+			minute: {points: 60, period: 1000},
+			hour: {points: 60, period: 1000*60},
+			day: {points:24, period: 1000*60*60},
+			week: {points:7, period: 1000*60*60*24},
+			month: {points:30, period: 1000*60*60*24},
+			year: {points: 12, period: 1000*60*60*24*30}
 		};
 
 		return times[interval];
-	},
-
-	generate_timeseries: function(data, points, period) {
-		var end = [];
-		var now = new Date().getTime();
-
-		for (var i=0; i<points; i++) {
-			end.push([now-i*period, 0]);
-		}
-
-		for (i=0; i<data.length; i++) {
-			var orig = data[i];
-
-			for (var j=0; j<end.length; j++) {
-				var time = end[j];
-
-				if (Math.abs(orig[0]-time[0]) < period) {
-					time[1] = orig[1];
-					break;
-				}
-			}
-		}
-
-		end.sort(function(a,b){return a[0]-b[0];});
-
-		return end;
 	},
 
 	generate_layered_series: function(sources, points, period) {
@@ -118,6 +93,7 @@ var Dash = {
 		var stack = [];
 
 		var cb = function(e) {
+			e[0] *= 1000; // now get seconds
 			return {x: e[0], y: e[1], timeago: that.timeago(+e[0])};
 		};
 
@@ -125,7 +101,11 @@ var Dash = {
 			stack[i] = {
 				name: sources[i].name,
 				colour: sources[i].colour,
-				values: this.generate_timeseries(sources[i].data, points, period).map(cb)};
+				values: sources[i].data.map(cb)
+			};
+
+			// set the text of the last point to 'now'
+			stack[i].values[stack[i].values.length-1].timeago = 'now';
 		}
 
 		stack.sort(function(a,b){return a.id>b.id;});
@@ -344,6 +324,7 @@ var Dash = {
 		else if (offset < (t.HOUR * 24))     span = [ Math.round(Math.abs(offset / t.HOUR)), 'hr' ];
 		else if (offset < (t.DAY * 7))       span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
 		else if (offset < (t.DAY * 31))      span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
+		else if (offset < (t.DAY * 366))      span = [ Math.round(Math.abs(offset / t.DAY/30)), 'month' ];
 		else                               span = [ '', 'a long time' ];
 
 
