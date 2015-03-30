@@ -87,37 +87,12 @@ var Dash = {
 		return times[interval];
 	},
 
-	generate_timeseries: function(data, points, period) {
-		var end = [];
-		var now = new Date().getTime();
-
-		for (var i=0; i<points; i++) {
-			end.push([now-i*period, 0]);
-		}
-
-		for (i=0; i<data.length; i++) {
-			var orig = data[i];
-
-			for (var j=0; j<end.length; j++) {
-				var time = end[j];
-
-				if (Math.abs(orig[0]-time[0]) < period) {
-					time[1] = orig[1];
-					break;
-				}
-			}
-		}
-
-		end.sort(function(a,b){return a[0]-b[0];});
-
-		return end;
-	},
-
 	generate_layered_series: function(sources, points, period) {
 		var that = this;
 		var stack = [];
 
 		var cb = function(e) {
+			e[0] *= 1000; // now get seconds
 			return {x: e[0], y: e[1], timeago: that.timeago(+e[0])};
 		};
 
@@ -125,7 +100,8 @@ var Dash = {
 			stack[i] = {
 				name: sources[i].name,
 				colour: sources[i].colour,
-				values: this.generate_timeseries(sources[i].data, points, period).map(cb)};
+				values: sources[i].data.map(cb)
+			};
 		}
 
 		stack.sort(function(a,b){return a.id>b.id;});
