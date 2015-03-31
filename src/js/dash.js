@@ -93,7 +93,6 @@ var Dash = {
 		var stack = [];
 
 		var cb = function(e) {
-			e[0] *= 1000; // now get seconds
 			return {x: e[0], y: e[1], timeago: that.timeago(+e[0])};
 		};
 
@@ -312,6 +311,8 @@ var Dash = {
 	},
 
 	timeago: function(time) {
+		time *= 1000;
+
 		var
 		local = new Date().getTime(),
 		offset = Math.abs((local - time)),
@@ -324,8 +325,8 @@ var Dash = {
 		else if (offset < (t.HOUR * 24))     span = [ Math.round(Math.abs(offset / t.HOUR)), 'hr' ];
 		else if (offset < (t.DAY * 7))       span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
 		else if (offset < (t.DAY * 31))      span = [ Math.round(Math.abs(offset / t.DAY)), 'day' ];
-		else if (offset < (t.DAY * 366))      span = [ Math.round(Math.abs(offset / t.DAY/30)), 'month' ];
-		else                               span = [ '', 'a long time' ];
+		else if (offset < (t.DAY * 366))     span = [ Math.round(Math.abs(offset / t.DAY/30)), 'month' ];
+		else                                 span = [ '', 'a long time' ];
 
 
 		span[1] += (span[0] === 0 || span[0] > 1) ? 's' : '';

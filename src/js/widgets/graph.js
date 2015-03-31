@@ -165,7 +165,7 @@ Dash.generate_graph = function(widget) {
 						.attr('class', 'circle')
 						.attr('cx', function(d) { return x(d.x); })
 						.attr('cy', function(d) { return y(d.y); })
-						.attr('r', 5)
+						.attr('r', 3.5)
 						.on('mouseover', tip.show)
 						.on('mouseout', tip.hide);
 				}
