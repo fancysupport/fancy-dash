@@ -45,7 +45,7 @@ Dash.generate_pie = function(widget) {
 				for (var i=0; i<ok.data.data.length; i++) {
 					for (var j=0; j<widget.sources.length; j++) {
 						if (ok.data.data[i].source_id === widget.sources[j].id) {
-							var value = ok.data.data[0].value;
+							var value = ok.data.data[i].value;
 							value = parseFloat(value) || 0;
 
 							sources.push({
