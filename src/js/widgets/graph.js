@@ -12,7 +12,7 @@ Dash.generate_graph = function(widget) {
 	var width = widget.size[0] * 200 - 20 - margin.left - margin.right;
 	var height = widget.size[1] * 200 - 20 - margin.top - margin.bottom;
 
-	var bar_width = width/points*0.8;
+	var bar_width = width/points*0.75;
 
 	// full bar gap either side for padding
 	var x = d3.scale.linear()
