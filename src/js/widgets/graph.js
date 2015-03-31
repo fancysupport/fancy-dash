@@ -150,6 +150,8 @@ Dash.generate_graph = function(widget) {
 
 				if (type === 'line') {
 					layers.selectAll('path').remove();
+					layers.selectAll('circle').remove();
+
 					layers.append('path')
 						.attr('class', 'line')
 						.attr('d', function(d) { return line(d.values); })
@@ -208,5 +210,5 @@ Dash.generate_graph = function(widget) {
 
 	draw();
 	this.intervals[widget.id] = this.intervals[widget.id] || [];
-	this.intervals[widget.id][0] = setInterval(draw, 5*1000);
+	this.intervals[widget.id][0] = setInterval(draw, 60*1000);
 };
