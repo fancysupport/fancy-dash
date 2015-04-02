@@ -13,11 +13,9 @@ var exec = require('child_process').exec;
 var notifier = require('node-notifier');
 var express = require('express');
 var sstatic = require('serve-static');
-var favicon = require('serve-favicon');
 
 gulp.task('http', function() {
 	var app = express();
-	app.use(favicon(__dirname + '/dist/favicon.ico'));
 	app.use(sstatic(__dirname + '/dist/assets'));
 	app.route('*').get(function(req, res, next) {
 		res.sendFile(__dirname + '/dist/index.html');
