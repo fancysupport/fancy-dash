@@ -42,7 +42,19 @@ Dash.generate_status = function(widget) {
 				node.selectAll('.status').remove();
 				node.selectAll('.title').remove();
 
-				var icon = check(source.data) ? happy_smiley : sad_smiley;
+				var is_ping = !!widget.config.ping;
+				var last_updated = ok.data.data[0].timestamp * 1000;
+
+				var icon;
+				var time = 5*60*1000; // 5 minutes
+				if (is_ping) {
+					// less than or equal to 5 minutes old
+					if (Date.now() - last_updated <= time) {
+						icon = check(source.data) ? happy_smiley : sad_smiley;
+					}
+					else icon = sad_smiley;
+				}
+				else icon = check(source.data) ? happy_smiley : sad_smiley;
 
 				var smiley = svg.append('g')
 					.attr('transform', 'translate(-62, 10)')
