@@ -171,13 +171,14 @@ Dash.generate_graph = function(widget) {
 				}
 
 				if (type === 'bar') {
+					// remove all the old ones
+					layers.selectAll('rect').remove();
+
 					var rect = layers.selectAll('rect').data(function(d) {
 						return d.values;
 					}, function(d) {
 						return d.x;
 					});
-
-					rect.exit().remove();
 
 					rect.enter().append('rect')
 						.attr('x', function(d) { return x(d.x) - bar_width/2; })
